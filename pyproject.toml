@@ -62,6 +62,7 @@ packages = [
     "agentic_suite.integrations.slack",
     "agentic_suite.middleware",
     "agentic_suite.clients",
+    "agentic_suite.config"
 ]
 
 [tool.pytest.ini_options]
