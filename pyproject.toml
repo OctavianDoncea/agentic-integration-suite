@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-integration-suite"
+version = "0.1.0"
+description = "An SDK, resilience middleware, and evaluation harness for agentic LLM tool calling"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Octavian-Nicolae Doncea" }]
+keywords = ["llm", "tool-calling", "agents", "integrations", "evals"]
+classifiers = [
+    "Programming language :: Python :: 3.11",
+    "Programming language :: Python :: 3.12",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+dependencies = [
+    "pydantic",
+    "pydantic-settings",
+    "python-dotenv",
+    "fastapi",
+    "uvicorn[standard]",
+    "httpx",
+    "groq",
+    "slack-sdk",
+    "sqlalchemy",
+    "alembic",
+    "psycopg2-binary",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "freezegun",
+    "respx",
+    "ruff",
+    "build",
+    "twine",
+]
+
+[project.urls]
+Homepage = "https://github.com/OctavianDoncea/agentic-integration-suite"
+Repository = "https://github.com/OctavianDoncea/agentic-integration-suite"
+
+# The mapping that keeps checklist paths intact
+# Directory on disk: src/sdk/base.py
+# Import path:       agentic_suite.sdk.base
+[tool.setuptools]
+package-dir = { "agentic_suite" = "src" }
+packages = [
+    "agentic_suite",
+    "agentic_suite.sdk",
+    "agentic_suite.tools",
+    "agentic_suite.tools.mock",
+    "agentic_suite.integrations",
+    "agentic_suite.integrations.slack",
+    "agentic_suite.middleware",
+    "agentic_suite.clients",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "evals"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "smoke: fast eval subset safe to run on every push",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.coverage.run]
+source = ["src"]
