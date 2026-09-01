@@ -1,6 +1,6 @@
-import pytest
 from __future__ import annotations
-from pydantic_settings import ValidationError
+import pytest
+from pydantic import ValidationError
 from agentic_suite.config import Settings, get_settings
 
 REQUIRED_VARS = ['GROQ_API_KEY', 'SLACK_CLIENT_ID', 'SLACK_CLIENT_SECRET', 'SLACK_SIGNING_SECRET', 'DATABASE_URL']

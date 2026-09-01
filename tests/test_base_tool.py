@@ -1,5 +1,5 @@
-import pytest
 from __future__ import annotations
+import pytest
 from pydantic import ValidationError, Field
 from agentic_suite.sdk.base import BaseTool, ConfigField, ToolDefinitionError
 
