@@ -13,7 +13,7 @@ def ConfigField(default: Any = None, **kwargs: Any) -> Any:
 
 def _to_snake_case(name: str) -> str:
     intermediate = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub(r'([a-zo-9])([A-Z])', r'\1_\2', intermediate).lower()
+    return re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', intermediate).lower()
 
 class ToolDefinitionError(TypeError):
     """Raised when a subclass is not usable as a tool"""
@@ -30,7 +30,7 @@ class BaseTool(BaseModel, ABC):
     tool_description: ClassVar[str | None] = None
 
     @abstractmethod
-    async def exceute(self, **kwargs: Any) -> dict[str, Any]:
+    async def execute(self, **kwargs: Any) -> dict[str, Any]:
         raise NotImplementedError
 
     @classmethod
@@ -89,5 +89,5 @@ class BaseTool(BaseModel, ABC):
         }
 
     @classmethod
-    def validate_schema(cls, arguments: dict[str, Any]) -> BaseTool:
+    def validate_arguments(cls, arguments: dict[str, Any]) -> BaseTool:
         return cls.model_validate(arguments)
