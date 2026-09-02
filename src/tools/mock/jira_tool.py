@@ -13,12 +13,13 @@ class JiraServerError(RuntimeError):
 
 
 class JiraIssueTool(BaseTool):
+    """Create a Jira issue with a title, priority, and project key"""
     title: str = Field(min_length=1, max_length=255, description='Issue summary/title.')
     priority: str = Field(description="Issue priority, e.g. 'Low', 'Medium', 'High'.")
     project_key: str = Field(min_length=2, max_length=10, description="Jira project key, e.g. 'ENG'.")
     inject_500_error: bool = ConfigField(False)
 
-    async def exceute(self, **kwargs: Any) -> dict[str, Any]:
+    async def execute(self, **kwargs: Any) -> dict[str, Any]:
         if self.inject_500_error:
             raise JiraServerError()
 

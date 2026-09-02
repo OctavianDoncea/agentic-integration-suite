@@ -12,8 +12,8 @@ class SlackMessageTool(BaseTool):
     @classmethod
     def _channel_must_start_with_hash(cls, value: str) -> str:
         if not value.startswith('#'):
-            raise ValueError('Channel must start with a hash (#)')
+            raise ValueError("channel must start with '#'")
         return value
 
-    async def exceute(self, **kwargs: Any) -> dict[str, Any]:
+    async def execute(self, **kwargs: Any) -> dict[str, Any]:
         return {'channel': self.channel, 'ok': True, 'ts': '1234567890.000100'}
