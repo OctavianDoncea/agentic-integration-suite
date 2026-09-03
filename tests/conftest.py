@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from cryptography.fernet import Fernet
 from agentic_suite.config import get_settings
 
 FAKE_ENV = {
@@ -8,6 +9,7 @@ FAKE_ENV = {
     "SLACK_CLIENT_ID": "1234567890.0987654321",
     "SLACK_CLIENT_SECRET": "test-client-secret",
     "SLACK_SIGNING_SECRET": "test-signing-secret",
+    "SLACK_TOKEN_ENCRYPTION_KEY": Fernet.generate_key().decode(),
     "DATABASE_URL": "postgresql+psycopg2://user:pass@localhost:5432/testdb",
     "APP_BASE_URL": "http://testserver",
     "ENVIRONMENT": "ci",
