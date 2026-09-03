@@ -4,6 +4,7 @@ from logging.config import fileConfig
 
 from agentic_suite.config import get_settings
 from agentic_suite.db import Base, normalize_database_url
+from agentic_suite.integrations.slack import models as slack_models
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
