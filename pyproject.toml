@@ -30,6 +30,7 @@ dependencies = [
     "sqlalchemy",
     "alembic",
     "psycopg2-binary",
+    "cryptography",
 ]
 
 [project.optional-dependencies]
