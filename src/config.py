@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     slack_client_secret: str = Field(min_length=1)
     slack_signing_secret: str = Field(min_length=1)
     database_url: str = Field(min_length=1)
+    slack_token_encryption_key: str = Field(
+        min_length=1,
+        description='Fernet key for encrypting Slack tokens at rest. Generate with: '
+        'python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
+    )
 
     groq_model_smoke: str = "llama-3.1-8b-instant"
     groq_model_full: str = "openai/gpt-oss-120b"
@@ -25,6 +30,7 @@ class Settings(BaseSettings):
     environment: Literal["development", "ci", "production"] = "development"
     log_level: str = "INFO"
     sql_echo: bool = False
+    oauth_state_ttl_seconds: int = 600
 
     @field_validator("app_base_url")
     def _strip_trailing_slash(cls, value: str) -> str:
