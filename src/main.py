@@ -1,12 +1,15 @@
-"""FastAPI application: Slack install and OAuth callback endpoints."""
+"""FastAPI application: Slack install and OAuth callback endpoints, handles events"""
 from __future__ import annotations
 import logging
-from fastapi import Depends, FastAPI, Query
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+import json
+from fastapi import Depends, FastAPI, Query, Request
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, PlainTextResponse
 from sqlalchemy.orm import Session
 from agentic_suite.config import get_settings
 from agentic_suite.db import get_session
 from agentic_suite.integrations.slack.oauth import InvalidOAuthStateError, TokenExchangeError, build_authorize_url, exchange_code_for_token, generate_state, persist_installation, verify_state
+from agentic_suite.integrations.slack.signature import check_slack_signature, SIGNATURE_HEADER, TIMESTAMP_HEADER
+from agentic_suite.integrations.slack.events import dispatcher, deduplicator
 
 logger = logging.getLogger(__name__)
 
@@ -55,3 +58,43 @@ async def slack_oauth_callback(code: str | None = Query(default=None), state: st
         f'(<code>{installation.team_id}</code>).</p>',
         status_code=200
     )
+
+@app.post('/slack/events', tags=['slack'])
+async def slack_events(request: Request):
+    raw_body = await request.body()
+
+    failure_reason = check_slack_signature(
+        body=raw_body,
+        timestamp=request.headers.get(TIMESTAMP_HEADER),
+        signature=request.headers.get(SIGNATURE_HEADER),
+        signing_secret=get_settings().slack_signing_secret
+    )
+    if failure_reason is not None:
+        logger.warning(f'Rejected Slack event delivery: {failure_reason}')
+        return PlainTextResponse('invalid signature', status_code=401)
+
+    try:
+        payload = json.loads(raw_body)
+    except json.JSONDecodeError:
+        logger.warning('Signed Slack delivery had a malformed JSON body')
+        return PlainTextResponse('bad request', status_code=400)
+
+    payload_type = payload.get('type')
+
+    if payload_type == 'url_verification':
+        return JSONResponse({'challenge': payload.get('challenge')})
+
+    if payload_type == 'event_callback':
+        retry_num = request.headers.get('X-Slack-Retry-Num')
+        if retry_num:
+            logger.info(f"Slack retry #{retry_num} (reason: {request.headers.get('X-Slack-Retry-Reason')})")
+
+        if deduplicator.is_duplicate(payload.get('event_id')):
+            logger.info(f'Dropped duplicate delivery of event_id={payload.get("event_id")}')
+            return JSONResponse({'ok': True, 'status': 'duplicate'})
+
+        status = dispatcher.dispatch(payload)
+        return JSONResponse({'ok': True, 'status': status})
+
+    logger.info(f'Ignoring unrecognized Slack payload type: {payload_type}')
+    return JSONResponse({'ok': True, 'status': 'ignored'})
