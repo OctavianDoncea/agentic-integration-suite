@@ -6,6 +6,7 @@ import respx
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool
 from agentic_suite.db import Base, get_session
 from agentic_suite.integrations.slack import oauth
 from agentic_suite.integrations.slack.models import SlackInstallation
@@ -22,7 +23,11 @@ TOKEN_PAYLOAD = {
 
 @pytest.fixture
 def db_session() -> Iterator[Session]:
-    engine = create_engine('sqlite+pysqlite:///:memory:')
+    engine = create_engine(
+        'sqlite+pysqlite:///:memory:',
+        connect_args={'check_same_thread': False},
+        poolclass=StaticPool,
+    )
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine, expire_on_commit=False)()
     try:
@@ -119,9 +124,8 @@ def test_expired_state_is_rejected(client: TestClient, monkeypatch):
     get_settings.cache_clear()
     state = _issued_state(client)
 
-    import time as time_module
-
-    monkeypatch.setattr(oauth.time, 'time', lambda: time_module.time() + 60)
+    real_time = oauth.time.time
+    monkeypatch.setattr(oauth.time, 'time', lambda: real_time() + 60)
     response = client.get(f'/slack/oauth/callback?code=c&state={state}')
 
     assert response.status_code == 400
