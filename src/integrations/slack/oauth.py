@@ -1,4 +1,4 @@
-"""Slack Oauth2: authorize URL, state handling, token exchange, persistence, retrieval, and revocation handling."""
+"""Slack OAuth2: authorize URL, state handling, token exchange, persistence, retrieval, and revocation handling."""
 from __future__ import annotations
 import base64
 import hmac
@@ -27,6 +27,7 @@ class InvalidOAuthStateError(SlackOAuthError):
 
 class TokenExchangeError(SlackOAuthError):
     def __init__(self, slack_error: str):
+        self.slack_error = slack_error
         super().__init__(f'Slack token exchange failed: {slack_error}')
 
 
@@ -74,7 +75,7 @@ class OAuthStateStore:
             raw = base64.urlsafe_b64decode(padded.encode()).decode()
             nonce, issued_at_str, signature = raw.rsplit(':', 2)
         except (ValueError, UnicodeDecodeError) as e:
-            raise InvalidOAuthStateError(f'Malformed state parameter.') from e
+            raise InvalidOAuthStateError('Malformed state parameter.') from e
 
         expected = self._sign(f'{nonce}:{issued_at_str}')
 
