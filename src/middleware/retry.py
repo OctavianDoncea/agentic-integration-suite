@@ -50,6 +50,11 @@ def get_retry_after(exc: BaseException) -> float | None:
     return max(0.0, value)
 
 def is_retryable(exc: BaseException) -> bool:
+    from agentic_suite.middleware.circuit_breaker import CircuitOpenError
+
+    if isinstance(exc, CircuitOpenError):
+        return False
+
     if isinstance(exc, (asyncio.TimeoutError, ConnectionError)):
         return True
 
