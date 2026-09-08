@@ -82,7 +82,7 @@ class CircuitBreaker:
         logger.warning(f"Circuit '{self.name}' OPEN after {self._failure_count} consecutive failures; rejecting calls for {self.cooldown_seconds:.0f}s.")
 
     def _to_closed(self) -> None:
-        if self._state is CircuitState.CLOSED:
+        if self._state is not CircuitState.CLOSED:
             logger.info(f"Circuit '{self.name}' CLOSED; dependency recovered")
         self._state = CircuitState.CLOSED
         self._failure_count = 0
