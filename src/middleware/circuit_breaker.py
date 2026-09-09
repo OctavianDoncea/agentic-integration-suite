@@ -5,7 +5,7 @@ import time
 from collections.abc import Awaitable, Callable
 from enum import Enum
 from typing import Any, TypeVar
-from agentic_suite.middleware.retry import is_retryable
+from agentic_suite.middleware.retry import RetryExhaustedError, is_retryable
 
 logger = logging.getLogger('middleware.circuit_breaker')
 
@@ -112,7 +112,8 @@ class CircuitBreaker:
         self._to_closed()
 
     def _record_failure(self, exc: BaseException) -> None:
-        if not self._countable(exc):
+        counted = exc.last_exception if isinstance(exc, RetryExhaustedError) else exc
+        if not self._countable(counted):
             self._trial_in_flight = False
             logger.debug(f"Circuit '{self.name}' ignoring non-countable {type(exc).__name__}")
 

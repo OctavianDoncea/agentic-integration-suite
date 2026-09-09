@@ -266,7 +266,7 @@ async def test_decorator_form(clock: FakeClock):
 
     @breaker
     async def flaky() -> None:
-        """Docstring that must survieve wrapping."""
+        """Docstring that must survive wrapping."""
         raise JiraServerError()
 
     for _ in range(2):
