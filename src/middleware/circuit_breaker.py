@@ -1,6 +1,7 @@
 from __future__ import annotations
 import functools
 import logging
+import threading
 import time
 from collections.abc import Awaitable, Callable
 from enum import Enum
@@ -63,23 +64,31 @@ class CircuitBreaker:
         self._opened_at: float | None = None
         self._trial_in_flight = False
         self._open_transitions = 0
+        self._lock = threading.Lock()
 
     @property
     def state(self) -> CircuitState:
-        return self._state
+        with self._lock:
+            return self._state
 
     @property
     def failure_count(self) -> int:
-        return self._failure_count
+        with self._lock:
+            return self._failure_count
 
     @property
     def open_transitions(self) -> int:
-        return self._open_transitions
+        with self._lock:
+            return self._open_transitions
 
     def seconds_until_retry(self) -> float:
+        with self._lock:
+            return self._seconds_until_retry()
+
+    def _seconds_until_retry(self) -> float:
         if self._state is not CircuitState.OPEN or self._opened_at is None:
             return 0.0
-        
+
         return max(0.0, self.cooldown_seconds - (self._clock() - self._opened_at))
 
     def _cooldown_elapsed(self) -> bool:
@@ -111,12 +120,13 @@ class CircuitBreaker:
         logger.info(f"Circuit '{self.name}' HALF_OPEN; admitting one trial call")
 
     def reset(self) -> None:
-        self._to_closed()
+        with self._lock:
+            self._to_closed()
 
     def _admit(self) -> None:
         if self._state is CircuitState.OPEN:
             if not self._cooldown_elapsed():
-                raise CircuitOpenError(self.name, self.seconds_until_retry())
+                raise CircuitOpenError(self.name, self._seconds_until_retry())
             self._to_half_open()
 
         if self._state is CircuitState.HALF_OPEN:
@@ -149,15 +159,18 @@ class CircuitBreaker:
             self._to_open()
 
     async def call(self, fn: Callable[..., Awaitable[T]], *args: Any, **kwargs: Any) -> T:
-        self._admit()
+        with self._lock:
+            self._admit()
 
         try:
             result = await fn(*args, **kwargs)
         except Exception as exc:
-            self._record_failure(exc)
+            with self._lock:
+                self._record_failure(exc)
             raise
 
-        self._record_success()
+        with self._lock:
+            self._record_success()
         return result
 
     def __call__(self, fn: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
