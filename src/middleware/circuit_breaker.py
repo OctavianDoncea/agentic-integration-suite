@@ -29,6 +29,14 @@ class CircuitOpenError(RuntimeError):
         super().__init__(f"Circuit '{name}' is open; rejecting call. Retry in {seconds_until_retry:.1f}s.")
 
 
+def _unwrap_retry_exhausted(exc: BaseException) -> BaseException:
+    if isinstance(exc, RetryExhaustedError):
+        return _unwrap_retry_exhausted(exc.last_exception)
+    return exc
+
+def counts_as_failure(exc: BaseException) -> bool:
+    return is_retryable(_unwrap_retry_exhausted(exc))
+
 class CircuitBreaker:
     def __init__(
         self,
@@ -36,7 +44,7 @@ class CircuitBreaker:
         *,
         failure_threshold: int = DEFAULT_FAILURE_THRESHOLD,
         cooldown_seconds: float = DEFAULT_COOLDOWN_SECONDS,
-        countable: Callable[[BaseException], bool] = is_retryable,
+        countable: Callable[[BaseException], bool] = counts_as_failure,
         clock: ClockFn = time.monotonic,
     ) -> None:
         if failure_threshold < 1:
@@ -54,6 +62,7 @@ class CircuitBreaker:
         self._failure_count = 0
         self._opened_at: float | None = None
         self._trial_in_flight = False
+        self._open_transitions = 0
 
     @property
     def state(self) -> CircuitState:
@@ -62,6 +71,10 @@ class CircuitBreaker:
     @property
     def failure_count(self) -> int:
         return self._failure_count
+
+    @property
+    def open_transitions(self) -> int:
+        return self._open_transitions
 
     def seconds_until_retry(self) -> float:
         if self._state is not CircuitState.OPEN or self._opened_at is None:
@@ -79,6 +92,7 @@ class CircuitBreaker:
         self._state = CircuitState.OPEN
         self._opened_at = self._clock()
         self._trial_in_flight = False
+        self._open_transitions += 1
         logger.warning(f"Circuit '{self.name}' OPEN after {self._failure_count} consecutive failures; rejecting calls for {self.cooldown_seconds:.0f}s.")
 
     def _to_closed(self) -> None:
@@ -112,11 +126,10 @@ class CircuitBreaker:
         self._to_closed()
 
     def _record_failure(self, exc: BaseException) -> None:
-        counted = exc.last_exception if isinstance(exc, RetryExhaustedError) else exc
-        if not self._countable(counted):
+        if not self._countable(exc):
             self._trial_in_flight = False
-            logger.debug(f"Circuit '{self.name}' ignoring non-countable {type(exc).__name__}")
-
+            ignored = _unwrap_retry_exhausted(exc)
+            logger.debug(f"Circuit '{self.name}' ignoring non-countable {type(ignored).__name__}")
             return
 
         if self._state is CircuitState.HALF_OPEN:
