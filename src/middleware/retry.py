@@ -131,8 +131,8 @@ def with_retry(
             assert last_exception is not None
             raise RetryExhaustedError(max_attempts, last_exception) from last_exception
 
-        if hasattr(fn, '__name__'):
-            functools.update_wrapper(wrapper, fn)
+        assigned = tuple(a for a in functools.WRAPPER_ASSIGNMENTS if hasattr(fn, a))
+        functools.update_wrapper(wrapper, fn, assigned=assigned)
         return wrapper
 
     return decorator

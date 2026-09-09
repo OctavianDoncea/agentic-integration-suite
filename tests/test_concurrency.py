@@ -27,6 +27,8 @@ class FakeClock:
 
 
 class FlakyDependency:
+    __name__ = 'FlakyDependency'
+
     def __init__(self, fail_first: int) -> None:
         self.fail_first = fail_first
         self.entered: list[int] = []
