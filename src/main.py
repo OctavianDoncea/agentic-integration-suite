@@ -10,8 +10,10 @@ from agentic_suite.db import get_session
 from agentic_suite.integrations.slack.oauth import InvalidOAuthStateError, TokenExchangeError, build_authorize_url, exchange_code_for_token, generate_state, persist_installation, verify_state
 from agentic_suite.integrations.slack.signature import check_slack_signature, SIGNATURE_HEADER, TIMESTAMP_HEADER
 from agentic_suite.integrations.slack.events import dispatcher, deduplicator
+from agentic_suite.logging_config import configure_logging
 
 logger = logging.getLogger(__name__)
+configure_logging()
 
 app = FastAPI(title='Agentic Integration Suite', description='Tool-calling SDK, resilience middleware, and evaluation harness.')
 
