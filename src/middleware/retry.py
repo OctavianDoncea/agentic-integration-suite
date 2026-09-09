@@ -28,6 +28,15 @@ class RetryExhaustedError(RuntimeError):
         )
 
 
+class RetryTracker:
+    def __init__(self) -> None:
+        self.attempts = 0
+
+    @property
+    def retries(self) -> int:
+        return max(0, self.attempts - 1)
+
+
 def get_retry_after(exc: BaseException) -> float | None:
     headers = getattr(exc, 'headers', None)
     if headers is None:
@@ -81,6 +90,7 @@ def with_retry(
     respect_retry_after: bool = True,
     sleep: SleepFn = asyncio.sleep,
     rng: RngFn = random.random,
+    tracker: RetryTracker | None = None
 ) -> Callable[[Callable[..., Awaitable[T]]], Callable[..., Awaitable[T]]]:
     if max_attempts < 1:
         raise ValueError('max_attempts must be at least 1.')
@@ -91,6 +101,8 @@ def with_retry(
             last_exception: BaseException | None = None
 
             for attempt in range(max_attempts):
+                if tracker is not None:
+                    tracker.attempts = attempt + 1
                 try:
                     return await fn(*args, **kwargs)
                 except Exception as exc:
