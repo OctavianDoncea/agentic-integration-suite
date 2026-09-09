@@ -89,6 +89,8 @@ class CircuitBreaker:
         return self._clock() - self._opened_at >= self.cooldown_seconds
 
     def _to_open(self) -> None:
+        if self._state is CircuitState.OPEN:
+            return
         self._state = CircuitState.OPEN
         self._opened_at = self._clock()
         self._trial_in_flight = False
@@ -123,6 +125,8 @@ class CircuitBreaker:
             self._trial_in_flight = True
 
     def _record_success(self) -> None:
+        if self._state is CircuitState.OPEN:
+            return
         self._to_closed()
 
     def _record_failure(self, exc: BaseException) -> None:
@@ -132,11 +136,15 @@ class CircuitBreaker:
             logger.debug(f"Circuit '{self.name}' ignoring non-countable {type(ignored).__name__}")
             return
 
+        if self._state is CircuitState.OPEN:
+            return
+
         if self._state is CircuitState.HALF_OPEN:
             self._to_open()
             return
 
-        self._failure_count += 1
+        if self._failure_count < self.failure_threshold:
+            self._failure_count += 1
         if self._failure_count >= self.failure_threshold:
             self._to_open()
 

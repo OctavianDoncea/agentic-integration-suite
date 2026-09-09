@@ -96,7 +96,8 @@ def with_retry(
         raise ValueError('max_attempts must be at least 1.')
 
     def decorator(fn: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
-        @functools.wraps(fn)
+        call_name = getattr(fn, '__name__', type(fn).__name__)
+
         async def wrapper(*args: Any, **kwargs: Any) -> T:
             last_exception: BaseException | None = None
 
@@ -109,7 +110,7 @@ def with_retry(
                     last_exception = exc
 
                     if not retryable(exc):
-                        logger.info(f'Not retrying {fn.__name__}: {type(exc).__name__} is terminal')
+                        logger.info(f'Not retrying {call_name}: {type(exc).__name__} is terminal')
                         raise
 
                     if attempt == max_attempts - 1:
@@ -124,12 +125,14 @@ def with_retry(
                             delay = min(retry_after, max_wait)
                             source = 'retry-after'
 
-                    logger.info(f'Attempt {attempt+1}/{max_attempts} of {fn.__name__} failed ({type(exc).__name__}); retrying in {delay:.3f}s ({source})')
+                    logger.info(f'Attempt {attempt+1}/{max_attempts} of {call_name} failed ({type(exc).__name__}); retrying in {delay:.3f}s ({source})')
                     await sleep(delay)
 
             assert last_exception is not None
             raise RetryExhaustedError(max_attempts, last_exception) from last_exception
 
+        if hasattr(fn, '__name__'):
+            functools.update_wrapper(wrapper, fn)
         return wrapper
 
     return decorator
