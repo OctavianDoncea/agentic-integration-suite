@@ -10,7 +10,7 @@ logger = logging.getLogger('telemetry.tool_invocation')
 
 Status = Literal['success', 'tool_error', 'validation_error', 'circuit_open', 'not_registered']
 
-SENSITIVE_KEYS = frozenset({'token', 'access_token', 'password', 'secret', 'api_key'})
+SENSITIVE_KEYS = frozenset({'token', 'access_token', 'password', 'secret', 'api-key'})
 SAFE_VALUE_MAX_LENGTH = 24
 
 def redact_arguments(arguments: dict[str, Any] | None) -> dict[str, str]:
