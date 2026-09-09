@@ -1,10 +1,12 @@
 from __future__ import annotations
+import time
 from typing import Any
 from pydantic import ValidationError
 from agentic_suite.sdk.base import BaseTool
+from agentic_suite.middleware.circuit_breaker import CircuitOpenError
 
 class ToolNotRegisteredError(KeyError):
-    """Raised when the model names a tool the registry dosn't know"""
+    """Raised when the model names a tool the registry doesn't know"""
     def __init__(self, tool_name: str, known_names: list[str]):
         self.tool_name = tool_name
         self.known_names = known_names
@@ -38,14 +40,39 @@ class ToolRegistry:
     def is_registered(self, tool_name: str) -> bool:
         return tool_name in self._tools
 
-    async def execute(self, tool_name: str, arguments: dict[str, Any] | None = None, **runtime_context: Any) -> dict[str, Any]:
-        """Validate arguments against the named tool and run it."""
+    async def execute(self, tool_name: str, arguments: dict[str, Any] | None = None, *, retry_count: int = 0, **runtime_context: Any) -> dict[str, Any]:
+        """Validate arguments against the named tool, run it, and log the outcome."""
+
         arguments = arguments or {}
+        started = time.monotonic()
 
-        if tool_name not in self._tools:
-            raise ToolNotRegisteredError(tool_name, sorted(self._tools))
+        def elapsed_ms() -> float:
+            return (time.monotonic() - started) * 1000
 
-        tool_cls = self._tools[tool_name]
-        tool = tool_cls.validate_arguments(arguments)
+        try:
+            if tool_name not in self._tools:
+                raise ToolNotRegisteredError(tool_name, sorted(self._tools))
 
-        return await tool.execute(**runtime_context)
+            tool = self._tools[tool_name].validate_arguments(arguments)
+            result = await tool.execute(**runtime_context)
+
+        except ToolNotRegisteredError as exc:
+            log_invocation(tool_name, arguments, elapsed_ms(), 'not_registered',
+                           retry_count, error_type=type(exc).__name__, error_message=str(exc))
+            raise
+        except ValidationError as exc:
+            log_invocation(tool_name, arguments, elapsed_ms(), 'validation_error',
+                           retry_count, error_type=type(exc).__name__,
+                           error_message=f'{exc.error_count()} validation error(s)')
+            raise
+        except CircuitOpenError as exc:
+            log_invocation(tool_name, arguments, elapsed_ms(), 'circuit_open',
+                           retry_count, error_type=type(exc).__name__, error_message=str(exc))
+            raise
+        except Exception as exc:
+            log_invocation(tool_name, arguments, elapsed_ms(), 'tool_error',
+                           retry_count, error_type=type(exc).__name__, error_message=str(exc))
+            raise
+
+        log_invocation(tool_name, arguments, elapsed_ms(), 'success', retry_count)
+        return result
