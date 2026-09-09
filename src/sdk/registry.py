@@ -4,6 +4,7 @@ from typing import Any
 from pydantic import ValidationError
 from agentic_suite.sdk.base import BaseTool
 from agentic_suite.middleware.circuit_breaker import CircuitOpenError
+from agentic_suite.middleware.telemetry import log_invocation
 
 class ToolNotRegisteredError(KeyError):
     """Raised when the model names a tool the registry doesn't know"""
