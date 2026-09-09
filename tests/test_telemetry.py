@@ -169,6 +169,7 @@ async def test_circuit_open_gets_its_own_status(registry, caplog):
     with pytest.raises(JiraServerError):
         await guarded()
 
+    caplog.clear()
     with caplog.at_level(logging.INFO, logger=TELEMETRY_LOGGER):
         with pytest.raises(CircuitOpenError):
             await breaker.call(registry.execute, 'jira_issue_tool', VALID_ARGS)
@@ -194,7 +195,7 @@ async def test_real_slack_message_text_is_not_logged(registry, caplog):
     secret_text = 'the acquisition closes on Tuesday and the price is 40 million'
 
     with caplog.at_level(logging.INFO, logger=TELEMETRY_LOGGER):
-        await registry.execute('slack_message_tool', {'channel': '#general', 'text': secret_text})
+        await registry.execute('slack_message_tool', {'channel': '#general', 'message': secret_text})
 
     line = caplog.records[0].message
     assert 'acquisition' not in line

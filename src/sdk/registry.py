@@ -64,7 +64,7 @@ class ToolRegistry:
         except ValidationError as exc:
             log_invocation(tool_name, arguments, elapsed_ms(), 'validation_error',
                            retry_count, error_type=type(exc).__name__,
-                           error_message=f'{exc.error_count()} validation error(s)')
+                           error_message=f'validation_error: {exc.error_count()} error(s)')
             raise
         except CircuitOpenError as exc:
             log_invocation(tool_name, arguments, elapsed_ms(), 'circuit_open',
