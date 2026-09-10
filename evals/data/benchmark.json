@@ -1,0 +1,83 @@
+{
+    "schema_version": 1,
+    "description": "Tool-calling benchmark for the Agentic Integration Suite. Bootstrap subset: 5 direct-intent cases used to validate the eval runner before scaling to 50.",
+    "cases": [
+        {
+            "id": "direct-001",
+            "category": "direct_intent",
+            "smoke": true,
+            "user_prompt": "Create a Jira ticket in the ENG project titled 'Fix login redirect loop' with High priority",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "jira_issue_tool",
+                "arguments": {
+                    "title": "Fix login redirect loop",
+                    "priority": "High",
+                    "project_key": "ENG"
+                }
+            },
+            "notes": "Every argument is stated explicitly. If this fails, the schema or the system prompt is wrong, not the model."
+        },
+        {
+            "id": "direct-002",
+            "category": "direct_intent",
+            "smoke": true,
+            "user_prompt": "What's the status of pull request 4471 in the vercel/next.js repo?",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "github_pr_tool",
+                "arguments": {
+                    "repo": "vercel/next.js",
+                    "pr_id": 4471
+                }
+            },
+            "notes": "Tests that pr_id is emitted as an integer, not the string '4471'."
+        },
+        {
+            "id": "direct-003",
+            "category": "direct_intent",
+            "smoke": true,
+            "user_prompt": "Post 'Deploy to production finished successfully' to the #releases channel on Slack.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "slack_message_tool",
+                "arguments": {
+                    "channel": "#releases",
+                    "message": "Deploy to production finished successfully"
+                }
+            },
+            "notes": "The '#' prefix is required by the tool's validator. Tests whether the model preserves it."
+        },
+        {
+            "id": "direct-004",
+            "category": "direct_intent",
+            "smoke": true,
+            "user_prompt": "Open a low priority ticket under project key PLATFORM: 'Update dependency lockfile'.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "jira_issue_tool",
+                "arguments": {
+                    "title": "Update dependency lockfile",
+                    "priority": "Low",
+                    "project_key": "PLATFORM"
+                }
+            },
+            "notes": "Arguments appear in a different order than the schema declares them, and priority is lowercase in the prompt."
+        },
+        {
+            "id": "direct-005",
+            "category": "direct_intent",
+            "smoke": true,
+            "user_prompt": "Check whether PR 12 has passed its checks. The repository is octocat/hello-world.",
+            "expected": {
+              "behavior": "tool_call",
+              "tool_name": "github_pr_tool",
+              "arguments": {
+                "repo": "octocat/hello-world",
+                "pr_id": 12
+              }
+            },
+            "notes": "The repo arrives in a second sentence, so the model must carry context across it."
+        }
+    ]
+}
