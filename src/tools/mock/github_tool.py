@@ -14,6 +14,7 @@ class GitHubRateLimitError(RuntimeError):
 
 class GitHubPRTool(BaseTool):
     """Fetch the status of a GitHub pull request."""
+    tool_name = 'github_pr_tool'
     repo: str = Field(description="Repository in 'owner/name' form")
     pr_id: int = Field(ge=1, description='Pull request number.')
     inject_429_rate_limit: bool = ConfigField(False)

@@ -16,7 +16,7 @@ def registry() -> ToolRegistry:
 def test_get_schema_for_all_returns_both_tools(registry: ToolRegistry):
     schemas = registry.get_schema_for_all()
     names = {s['function']['name'] for s in schemas}
-    assert names == {'jira_issue_tool', 'git_hub_pr_tool'}
+    assert names == {'jira_issue_tool', 'github_pr_tool'}
 
 def test_is_registered(registry: ToolRegistry):
     assert registry.is_registered('jira_issue_tool')

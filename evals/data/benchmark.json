@@ -70,12 +70,12 @@
             "smoke": true,
             "user_prompt": "Check whether PR 12 has passed its checks. The repository is octocat/hello-world.",
             "expected": {
-              "behavior": "tool_call",
-              "tool_name": "github_pr_tool",
-              "arguments": {
-                "repo": "octocat/hello-world",
-                "pr_id": 12
-              }
+                "behaviour": "tool_call",
+                "tool_name": "github_pr_tool",
+                "arguments": {
+                    "repo": "octocat/hello-world",
+                    "pr_id": 12
+                }
             },
             "notes": "The repo arrives in a second sentence, so the model must carry context across it."
         }
