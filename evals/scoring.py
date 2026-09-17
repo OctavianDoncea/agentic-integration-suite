@@ -63,7 +63,7 @@ def _arguments_match(expected: dict[str, Any] | None, flexible: list[str], actua
         if key not in actual:
             return f"missing argument '{key}'"
         got = actual[key]
-        if got != want:
+        if got != want or type(got) is not type(want):
             return f"argument '{key}': expected {want!r} ({type(want).__name__}), got {got!r} ({type(got).__name__})"
 
     for key in flexible:
