@@ -1,6 +1,6 @@
 {
     "schema_version": 1,
-    "description": "Tool-calling benchmark for the Agentic Integration Suite. Bootstrap subset: 5 direct-intent cases used to validate the eval runner before scaling to 50.",
+    "description": "Tool-calling benchmark for the Agentic Integration Suite: direct intent, ambiguous prompts, and schema/coercion edge cases.",
     "cases": [
         {
             "id": "direct-001",
@@ -78,6 +78,628 @@
                 }
             },
             "notes": "The repo arrives in a second sentence, so the model must carry context across it."
+        },
+        {
+            "id": "direct-006",
+            "category": "direct_intent",
+            "user_prompt": "Schedule a calendar event titled 'Sprint planning' starting 2026-03-14T09:30:00Z for 60 minutes.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Sprint planning",
+                    "start_time": "2026-03-14T09:30:00Z",
+                    "duration_minutes": 60
+                }
+            },
+            "notes": "Required calendar fields are all explicit. Optional attendees/visibility/send_invites may keep defaults."
+        },
+        {
+            "id": "direct-007",
+            "category": "direct_intent",
+            "user_prompt": "Message #eng on Slack: 'Incident war room is in huddle 3.'",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "slack_message_tool",
+                "arguments": {
+                    "channel": "#eng",
+                    "message": "Incident war room is in huddle 3."
+                }
+            },
+            "notes": "Direct Slack call with '#' already present."
+        },
+        {
+            "id": "direct-008",
+            "category": "direct_intent",
+            "user_prompt": "Create a Medium priority INFRA ticket titled 'Rotate TLS certificates'.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "jira_issue_tool",
+                "arguments": {
+                    "title": "Rotate TLS certificates",
+                    "priority": "Medium",
+                    "project_key": "INFRA"
+                }
+            },
+            "notes": "Canonical Medium plus a project key that is not ENG."
+        },
+        {
+            "id": "direct-009",
+            "category": "direct_intent",
+            "user_prompt": "Look up pull request 12345 in facebook/react.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "github_pr_tool",
+                "arguments": {
+                    "repo": "facebook/react",
+                    "pr_id": 12345
+                }
+            },
+            "notes": "Repo in owner/name form; pr_id must be an integer."
+        },
+        {
+            "id": "direct-010",
+            "category": "direct_intent",
+            "user_prompt": "Book 'Design critique' on 2026-04-02T15:00:00Z lasting 45 minutes, invite ana@example.com and alex@example.com, visibility public.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Design critique",
+                    "start_time": "2026-04-02T15:00:00Z",
+                    "duration_minutes": 45,
+                    "attendees": ["ana@example.com", "alex@example.com"],
+                    "visibility": "public"
+                }
+            },
+            "notes": "Optional attendees and visibility are stated; start_time is an absolute ISO timestamp."
+        },
+        {
+            "id": "direct-011",
+            "category": "direct_intent",
+            "user_prompt": "Post 'Pager is quiet' in the #alerts Slack channel.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "slack_message_tool",
+                "arguments": {
+                    "channel": "#alerts",
+                    "message": "Pager is quiet"
+                }
+            },
+            "notes": "Channel name and message are explicit."
+        },
+        {
+            "id": "direct-012",
+            "category": "direct_intent",
+            "user_prompt": "File a High priority DATA ticket: 'Backfill orders warehouse'.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "jira_issue_tool",
+                "arguments": {
+                    "title": "Backfill orders warehouse",
+                    "priority": "High",
+                    "project_key": "DATA"
+                }
+            },
+            "notes": "Title after a colon; all Jira fields still explicit."
+        },
+        {
+            "id": "direct-013",
+            "category": "direct_intent",
+            "user_prompt": "What's the status of kubernetes/kubernetes PR 999?",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "github_pr_tool",
+                "arguments": {
+                    "repo": "kubernetes/kubernetes",
+                    "pr_id": 999
+                }
+            },
+            "notes": "Repo appears before the PR number; pr_id is still an integer."
+        },
+        {
+            "id": "direct-014",
+            "category": "direct_intent",
+            "user_prompt": "Create a private calendar event '1:1 with Sam' starting 2026-05-11T16:00:00Z for 30 minutes and do not send invites.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "1:1 with Sam",
+                    "start_time": "2026-05-11T16:00:00Z",
+                    "duration_minutes": 30,
+                    "visibility": "private",
+                    "send_invites": false
+                }
+            },
+            "notes": "Explicit visibility and send_invites=false override the schema defaults."
+        },
+        {
+            "id": "direct-015",
+            "category": "direct_intent",
+            "user_prompt": "Send 'Mockups are in Figma' to #design on Slack.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "slack_message_tool",
+                "arguments": {
+                    "channel": "#design",
+                    "message": "Mockups are in Figma"
+                }
+            },
+            "notes": "Short explicit Slack post; '#' already in the prompt."
+        },
+        {
+            "id": "ambiguous-001",
+            "category": "ambiguous",
+            "smoke": false,
+            "user_prompt": "Create a ticket for the login bug. It's urgent.",
+            "expected": {
+                "behaviour": "clarify_or_default",
+                "default_tool_name": "jira_issue_tool",
+                "default_arguments": {
+                    "project_key": "ENG",
+                    "priority": "High"
+                },
+                "flexible_arguments": ["title"]
+            },
+            "notes": "No project key given. The system prompt documents ENG as the default, so project_key ENG is accepted; 'urgent' maps to High. Title is unconstrained."
+        },
+        {
+            "id": "ambiguous-002",
+            "category": "ambiguous",
+            "user_prompt": "What's the status of pull request 88?",
+            "expected": {
+                "behaviour": "clarify"
+            },
+            "notes": "Missing required repo. No documented default repository, so the model must ask rather than invent owner/name."
+        },
+        {
+            "id": "ambiguous-003",
+            "category": "ambiguous",
+            "user_prompt": "Post 'deploy complete' on Slack.",
+            "expected": {
+                "behaviour": "clarify"
+            },
+            "notes": "Missing required channel. No default Slack channel is documented, so guessing #general would be a failure."
+        },
+        {
+            "id": "ambiguous-004",
+            "category": "ambiguous",
+            "user_prompt": "Book a 30-minute public event titled 'Sync'.",
+            "expected": {
+                "behaviour": "clarify"
+            },
+            "notes": "Missing required start_time. Duration, visibility, and title are present; the model must ask when, not invent a timestamp."
+        },
+        {
+            "id": "ambiguous-005",
+            "category": "ambiguous",
+            "user_prompt": "Create a PLATFORM ticket titled 'Flaky tests' and mark it as urgent.",
+            "expected": {
+                "behaviour": "clarify_or_default",
+                "default_tool_name": "jira_issue_tool",
+                "default_arguments": {
+                    "title": "Flaky tests",
+                    "project_key": "PLATFORM",
+                    "priority": "High"
+                }
+            },
+            "notes": "Underspecified value: 'urgent' is not a schema enum (priority is a free string) but the system prompt maps it to High. Emitting 'Urgent' is the failure mode."
+        },
+        {
+            "id": "ambiguous-006",
+            "category": "ambiguous",
+            "user_prompt": "File an ENG ticket 'Cache stampede' and set priority to critical.",
+            "expected": {
+                "behaviour": "clarify_or_default",
+                "default_tool_name": "jira_issue_tool",
+                "default_arguments": {
+                    "title": "Cache stampede",
+                    "project_key": "ENG",
+                    "priority": "High"
+                }
+            },
+            "notes": "Underspecified value: 'critical' is documented as High. Tests that the model maps onto the documented set instead of inventing Critical."
+        },
+        {
+            "id": "ambiguous-007",
+            "category": "ambiguous",
+            "user_prompt": "Open an ENG ticket titled 'Docs typo' whenever you can.",
+            "expected": {
+                "behaviour": "clarify_or_default",
+                "default_tool_name": "jira_issue_tool",
+                "default_arguments": {
+                    "title": "Docs typo",
+                    "project_key": "ENG",
+                    "priority": "Low"
+                }
+            },
+            "notes": "Underspecified value: 'whenever' is documented as Low. Emitting the raw adverb as priority fails."
+        },
+        {
+            "id": "ambiguous-008",
+            "category": "ambiguous",
+            "user_prompt": "Create an ENG ticket 'Payment webhook timeout' and mark it P0.",
+            "expected": {
+                "behaviour": "clarify"
+            },
+            "notes": "Underspecified value: 'P0' is not in the documented priority set and has no mapping. Asking is required; inventing P0 or guessing High without a documented rule both miss the point of the case."
+        },
+        {
+            "id": "ambiguous-009",
+            "category": "ambiguous",
+            "user_prompt": "Let the team know PR 12 is ready.",
+            "expected": {
+                "behaviour": "clarify"
+            },
+            "notes": "Multiple plausible tools: Slack notify vs GitHub PR status. Either is defensible and both are missing required args (channel / repo), so the model should ask rather than pick."
+        },
+        {
+            "id": "ambiguous-010",
+            "category": "ambiguous",
+            "user_prompt": "The checkout crash is fixed. File a ticket or ping #eng, whichever you think is right.",
+            "expected": {
+                "behaviour": "clarify"
+            },
+            "notes": "Multiple plausible tools: jira_issue_tool or slack_message_tool. The user explicitly declined to choose; asking which is the accepted behaviour."
+        },
+        {
+            "id": "ambiguous-011",
+            "category": "ambiguous",
+            "user_prompt": "Announce that octocat/hello-world PR 12 passed its checks.",
+            "expected": {
+                "behaviour": "clarify"
+            },
+            "notes": "Multiple plausible tools: Slack announcement vs GitHub status fetch. Prefer asking; specifying Slack would also be reasonable but the prompt never names a channel."
+        },
+        {
+            "id": "ambiguous-012",
+            "category": "ambiguous",
+            "user_prompt": "Document the outage in Jira or tell the team on Slack. Your call.",
+            "expected": {
+                "behaviour": "clarify"
+            },
+            "notes": "Multiple plausible tools with incomplete args for both. Notes record that either tool is defensible; expected behaviour is to ask which, not to guess project_key or channel."
+        },
+        {
+            "id": "ambiguous-013",
+            "category": "ambiguous",
+            "user_prompt": "What's our code review SLA?",
+            "expected": {
+                "behaviour": "no_tool_call"
+            },
+            "notes": "No registered tool answers a policy question. Failure mode: calling GitHub or Jira because those tools exist."
+        },
+        {
+            "id": "ambiguous-014",
+            "category": "ambiguous",
+            "smoke": false,
+            "user_prompt": "What's our policy on deploying on Fridays?",
+            "expected": {
+                "behaviour": "no_tool_call"
+            },
+            "notes": "No registered tool answers this. Failure mode under test: calling a tool because tools are present."
+        },
+        {
+            "id": "ambiguous-015",
+            "category": "ambiguous",
+            "user_prompt": "Who is the on-call engineer this week?",
+            "expected": {
+                "behaviour": "no_tool_call"
+            },
+            "notes": "No on-call or directory tool is registered. A Slack or Jira call would be inventing a capability."
+        },
+        {
+            "id": "edge-001",
+            "category": "edge_case_schema",
+            "user_prompt": "Send 'build green' to the releases channel on Slack.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "slack_message_tool",
+                "arguments": {
+                    "channel": "#releases",
+                    "message": "build green"
+                }
+            },
+            "notes": "Channel given without '#'. Tests that the model supplies the prefix the validator requires."
+        },
+        {
+            "id": "edge-002",
+            "category": "edge_case_schema",
+            "user_prompt": "Open a HIGH priority ticket in OPS titled 'Pager duty flake'.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "jira_issue_tool",
+                "arguments": {
+                    "title": "Pager duty flake",
+                    "priority": "High",
+                    "project_key": "OPS"
+                }
+            },
+            "notes": "Priority written in all caps. Tests canonical 'High' rather than the raw string 'HIGH'."
+        },
+        {
+            "id": "edge-003",
+            "category": "edge_case_schema",
+            "smoke": false,
+            "user_prompt": "Check the status of pull request number four hundred and seventy-one in facebook/react.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "github_pr_tool",
+                "arguments": {
+                    "repo": "facebook/react",
+                    "pr_id": 471
+                }
+            },
+            "notes": "Number written as words. Tests integer emission, not string '471' or 'four hundred and seventy-one'."
+        },
+        {
+            "id": "edge-004",
+            "category": "edge_case_schema",
+            "user_prompt": "What's the status of the twelfth pull request in octocat/hello-world?",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "github_pr_tool",
+                "arguments": {
+                    "repo": "octocat/hello-world",
+                    "pr_id": 12
+                }
+            },
+            "notes": "Ordinal word to integer. Failure mode: emitting 12 as a string or skipping the call."
+        },
+        {
+            "id": "edge-005",
+            "category": "edge_case_schema",
+            "user_prompt": "What's the status of https://github.com/vercel/next.js/pull/4471 ?",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "github_pr_tool",
+                "arguments": {
+                    "repo": "vercel/next.js",
+                    "pr_id": 4471
+                }
+            },
+            "notes": "Repo and pr_id must be parsed out of a URL, not passed as the raw URL string."
+        },
+        {
+            "id": "edge-006",
+            "category": "edge_case_schema",
+            "user_prompt": "Check PR #204 in kubernetes/kubernetes.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "github_pr_tool",
+                "arguments": {
+                    "repo": "kubernetes/kubernetes",
+                    "pr_id": 204
+                }
+            },
+            "notes": "Hash-prefixed identifier. Tests integer 204, not the string '#204'."
+        },
+        {
+            "id": "edge-007",
+            "category": "edge_case_schema",
+            "smoke": false,
+            "user_prompt": "Schedule 'Sprint planning' for March 14th 2026 at 9:30am UTC, one hour, with ana@example.com and alex@example.com.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Sprint planning",
+                    "start_time": "2026-03-14T09:30:00Z",
+                    "duration_minutes": 60,
+                    "attendees": ["ana@example.com", "alex@example.com"]
+                }
+            },
+            "notes": "Natural-language date to ISO-8601; 'one hour' to 60; two emails to an array."
+        },
+        {
+            "id": "edge-008",
+            "category": "edge_case_schema",
+            "user_prompt": "Book 'Design review' for April 2nd 2026 at 14:00 UTC, two hours, no attendees.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Design review",
+                    "start_time": "2026-04-02T14:00:00Z",
+                    "duration_minutes": 120,
+                    "attendees": []
+                }
+            },
+            "notes": "'two hours' to integer 120; empty attendee list rather than omitting a required-looking field as null."
+        },
+        {
+            "id": "edge-009",
+            "category": "edge_case_schema",
+            "user_prompt": "Schedule 'Coffee chat' on 2026-05-01 at 11:00 UTC for half an hour.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Coffee chat",
+                    "start_time": "2026-05-01T11:00:00Z",
+                    "duration_minutes": 30
+                }
+            },
+            "notes": "'half an hour' to 30. Date already looks ISO but still needs a time component and Z."
+        },
+        {
+            "id": "edge-010",
+            "category": "edge_case_schema",
+            "user_prompt": "Create '1:1 with Ana' on June 8 2026 at 16:00 UTC for 45 minutes and invite ana@example.com.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "1:1 with Ana",
+                    "start_time": "2026-06-08T16:00:00Z",
+                    "duration_minutes": 45,
+                    "attendees": ["ana@example.com"]
+                }
+            },
+            "notes": "Single email must still be an array of one, not a bare string."
+        },
+        {
+            "id": "edge-011",
+            "category": "edge_case_schema",
+            "user_prompt": "Schedule a public all-hands titled 'Q2 All Hands' on July 1st 2026 at 17:00 UTC for 90 minutes.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Q2 All Hands",
+                    "start_time": "2026-07-01T17:00:00Z",
+                    "duration_minutes": 90,
+                    "visibility": "public"
+                }
+            },
+            "notes": "Enum selection: 'public' from prose. 90 minutes as an int, not '90 minutes'."
+        },
+        {
+            "id": "edge-012",
+            "category": "edge_case_schema",
+            "smoke": false,
+            "user_prompt": "Book a 15-minute private standup tomorrow at 10am UTC. Don't send invites.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "duration_minutes": 15,
+                    "visibility": "private",
+                    "send_invites": false
+                },
+                "flexible_arguments": ["title", "start_time"]
+            },
+            "notes": "Tests boolean negation ('don't send' → false) and enum selection. 'Tomorrow' is relative, so start_time is flexible."
+        },
+        {
+            "id": "edge-013",
+            "category": "edge_case_schema",
+            "user_prompt": "Schedule 'Retro' for August 20th 2026 at 3:30pm UTC, lasting 25 minutes.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Retro",
+                    "start_time": "2026-08-20T15:30:00Z",
+                    "duration_minutes": 25
+                }
+            },
+            "notes": "AM/PM clock to 24-hour ISO-8601 (3:30pm → 15:30)."
+        },
+        {
+            "id": "edge-014",
+            "category": "edge_case_schema",
+            "user_prompt": "Book 'Vendor call' on 9 Sep 2026 at 09:00 UTC+00:00 for 40 minutes.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Vendor call",
+                    "start_time": "2026-09-09T09:00:00Z",
+                    "duration_minutes": 40
+                }
+            },
+            "notes": "Explicit UTC+00:00 offset should be emitted as ISO-8601 with Z, matching the system prompt."
+        },
+        {
+            "id": "edge-015",
+            "category": "edge_case_schema",
+            "user_prompt": "Schedule 'Planning' for October 5th 2026 at 13:00 UTC, one hour, invite ana@example.com, alex@example.com, john@example.com.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Planning",
+                    "start_time": "2026-10-05T13:00:00Z",
+                    "duration_minutes": 60,
+                    "attendees": [
+                        "ana@example.com",
+                        "alex@example.com",
+                        "john@example.com"
+                    ]
+                }
+            },
+            "notes": "Comma-separated emails to an array of three strings, order preserved."
+        },
+        {
+            "id": "edge-016",
+            "category": "edge_case_schema",
+            "user_prompt": "Create a private event 'Offer review' on November 3rd 2026 at 12:00 UTC for 20 minutes. Do not email the attendees.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Offer review",
+                    "start_time": "2026-11-03T12:00:00Z",
+                    "duration_minutes": 20,
+                    "visibility": "private",
+                    "send_invites": false
+                }
+            },
+            "notes": "Boolean negation via 'do not email', independent of the 'don't send invites' phrasing in edge-012."
+        },
+        {
+            "id": "edge-017",
+            "category": "edge_case_schema",
+            "user_prompt": "Put 'Quick sync' on the calendar for December 1st 2026 at 08:00 UTC, 15 min long, and please send invites.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Quick sync",
+                    "start_time": "2026-12-01T08:00:00Z",
+                    "duration_minutes": 15,
+                    "send_invites": true
+                }
+            },
+            "notes": "Boolean affirmation ('please send invites' -> true) and abbreviated duration '15 min' -> 15."
+        },
+        {
+            "id": "edge-018",
+            "category": "edge_case_schema",
+            "user_prompt": "Schedule \"Kickoff: Q3 'ship' review\" for March 1st 2026 at 10:00 UTC for an hour.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Kickoff: Q3 'ship' review",
+                    "start_time": "2026-03-01T10:00:00Z",
+                    "duration_minutes": 60
+                }
+            },
+            "notes": "Quoted title with nested quotes and punctuation must be copied, not stripped to Kickoff."
+        },
+        {
+            "id": "edge-019",
+            "category": "edge_case_schema",
+            "user_prompt": "Book 'Workshop' on January 15th 2026 at 13:00 UTC lasting ninety minutes, visibility private.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "calendar_event_tool",
+                "arguments": {
+                    "title": "Workshop",
+                    "start_time": "2026-01-15T13:00:00Z",
+                    "duration_minutes": 90,
+                    "visibility": "private"
+                }
+            },
+            "notes": "Duration as an English number word ('ninety') to int 90; explicit enum 'private'."
+        },
+        {
+            "id": "edge-020",
+            "category": "edge_case_schema",
+            "user_prompt": "File a medium-priority ENG ticket: 'Retry storm on checkout'.",
+            "expected": {
+                "behaviour": "tool_call",
+                "tool_name": "jira_issue_tool",
+                "arguments": {
+                    "title": "Retry storm on checkout",
+                    "priority": "Medium",
+                    "project_key": "ENG"
+                }
+            },
+            "notes": "Hyphenated informal priority 'medium-priority' must become canonical 'Medium', not 'medium-priority'."
         }
     ]
 }
