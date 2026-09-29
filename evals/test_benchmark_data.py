@@ -72,6 +72,10 @@ def test_expected_arguments_validate_against_their_tool(benchmark, registry):
                 payload = dict(args)
                 for flex in case.expected.flexible_arguments:
                     payload.setdefault(flex, _placeholder(tool_cls, flex))
+                if case.expected.behaviour is Behaviour.CLARIFY:
+                    for field_name, field in tool_cls.model_fields.items():
+                        if field_name not in payload and field.is_required():
+                            payload[field_name] = _placeholder(tool_cls, field_name)
                 tool_cls.validate_arguments(payload)
 
 def test_flexible_arguments_are_real_fields(benchmark, registry):
