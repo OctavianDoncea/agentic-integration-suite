@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from datetime import datetime, timezone
-from sqlalchemy import Boolean, DateTime, Integer, String, func
+from sqlalchemy import Boolean, DateTime, Index, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 from agentic_suite.db import Base
 from agentic_suite.integrations.slack.crypto import EncryptedString
@@ -13,9 +13,12 @@ def _utcnow() -> datetime:
 class SlackInstallation(Base):
     """A single workspace's installation of the Slack app."""
     __tablename__ = 'slack_installations'
+    __table_args__ = (
+        Index('ix_slack_installations_team_id', 'team_id', unique=True),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    team_id: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
+    team_id: Mapped[str] = mapped_column(String(32), nullable=False)
     team_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     access_token: Mapped[str] = mapped_column(EncryptedString(1024), nullable=False)
     refresh_token: Mapped[str | None] = mapped_column(EncryptedString(1024), nullable=True)
