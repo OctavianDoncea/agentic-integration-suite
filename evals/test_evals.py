@@ -15,11 +15,13 @@ from agentic_suite.tools.mock.slack_tool import SlackMessageTool
 from evals.schema import BenchmarkCase, load_benchmark
 from evals.scoring import RunSummary, score_case
 from agentic_suite.middleware.retry import with_retry
+from evals.threshold import BASELINE_FULL_MODEL, BASELINE_SMOKE_MODEL, FULL_THRESHOLD, SMOKE_THRESHOLD
 
 SYSTEM_PROMPT_PATH = Path(__file__).parent / 'data' / 'system_prompt.txt'
 RESULTS_DIR = Path(__file__).parent / 'results'
 MAX_CONCURRENCY = 1
-REGRESSION_THRESHOLD = 0.0
+MAX_ATTEMPTS = 5
+MAX_WAIT_SECONDS = 60.0
 
 def build_registry() -> ToolRegistry:
     registry = ToolRegistry()
@@ -33,7 +35,7 @@ def resolve_model() -> str:
     return os.environ.get('EVAL_MODEL') or settings.groq_model_full
 
 async def run_case(case: BenchmarkCase, client: GroqClient, registry: ToolRegistry, system_prompt: str, semaphore: asyncio.Semaphore) -> ModelResponse:
-    @with_retry(max_attempts=5, max_wait=60.0)
+    @with_retry(max_attempts=MAX_ATTEMPTS, max_wait=MAX_WAIT_SECONDS)
     async def call():
         return await client.complete(
             messages=[
@@ -52,7 +54,7 @@ async def run_sweep(cases: list[BenchmarkCase], model: str) -> RunSummary:
     system_prompt = SYSTEM_PROMPT_PATH.read_text(encoding='utf-8')
     semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
     responses = await asyncio.gather(*(run_case(c, client, registry, system_prompt, semaphore) for c in cases), return_exceptions=True)
-    results = []
+    results: list[CaseResult] = []
 
     for case, response in zip(cases, responses, strict=True):
         if isinstance(response, BaseException):
@@ -95,22 +97,22 @@ def report(summary: RunSummary) -> str:
 
 @pytest.mark.smoke
 async def test_smoke_subset():
-    cases = load_benchmark().smoke_subset()
-    summary = await run_sweep(cases, resolve_model())
+    summary = await run_sweep(load_benchmark().smoke_subset(), resolve_model())
     path = write_results(summary, 'smoke')
 
     print(report(summary))
     print(f'\nResults: {path}')
+    print(f'Threshold: {SMOKE_THRESHOLD:.1%} (baseline model: {BASELINE_SMOKE_MODEL})')
 
-    assert summary.pass_rate >= REGRESSION_THRESHOLD, report(summary)
+    assert summary.pass_rate >= SMOKE_THRESHOLD, report(summary)
 
 @pytest.mark.sweep
 async def test_full_sweep():
-    cases = load_benchmark().cases
-    summary = await run_sweep(cases, resolve_model())
-    path = write_results(summary, 'full')
+    summary = await run_sweep(load_benchmark().cases, resolve_model())
 
+    path = write_results(summary, "full")
     print(report(summary))
     print(f'\nResults: {path}')
+    print(f'Threshold: {FULL_THRESHOLD:.1%} (baseline model: {BASELINE_FULL_MODEL})')
 
-    assert summary.pass_rate >= REGRESSION_THRESHOLD, report(summary)
+    assert summary.pass_rate >= FULL_THRESHOLD, report(summary)

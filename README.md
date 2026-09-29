@@ -145,6 +145,33 @@ Current bootstrap: **five `direct_intent` smoke cases** — Jira create (explici
 
 Dataset tests (`evals/test_benchmark_data.py`) load the JSON, check named tools exist, expected args validate, smoke subset size, distinct prompts, and that ambiguous cases record notes. They do not call a model.
 
+## Evals
+
+Two metrics over 50 cases in three categories (direct intent, ambiguous, edge-case schema): **tool-selection accuracy** (did the model pick the right tool, or correctly pick none) and **argument precision** (do the emitted arguments validate against the target tool's Pydantic model and match the case's expectation). They are scored separately because picking the wrong tool and filling the right tool badly are different failures with different fixes.
+
+### Baseline
+
+The CI thresholds are derived from recorded sweeps, not chosen. `openai/gpt-oss-120b` scored **90%** over the full 50 cases; `openai/gpt-oss-20b` scored **100%** over the 5-case smoke subset. Both runs are committed verbatim as `evals/baseline_results.json` and `evals/baseline_smoke.json`. Thresholds are those rates minus a 5-point safety margin, computed in `evals/threshold.py` from the baseline files themselves so the two cannot drift apart. The margin covers run-to-run variance (two consecutive `temperature=0` sweeps differed by 1 case) and provider-side model updates, which land without notice on a hosted API. Last refreshed: **2026-09-29**.
+
+### Refreshing
+
+Refresh when the benchmark changes, when `evals/data/system_prompt.txt` changes (ambiguous cases depend on the defaults it documents, so editing it invalidates the baseline), or when a model version changes. Run:
+
+```bash
+python -m evals.baseline --model openai/gpt-oss-120b
+python -m evals.baseline --model openai/gpt-oss-20b --smoke
+```
+
+Commit the regenerated baseline files in the same commit as whatever caused the refresh, so the diff shows the cause and the effect together.
+
+Never raise a threshold to make a red build green. A failing sweep means either a real regression or a bad case; both are worth the few minutes to tell apart.
+
+### Known limitations
+
+- Clarification detection is a substring check for a question mark, not a model-graded judgment. A benchmark whose scoring depends on a second model inherits that model's failures.
+- `temperature=0` reduces but does not eliminate variance on a hosted API.
+- Argument precision is averaged only over cases where a tool call was expected and made; cases that correctly abstain are excluded so abstention does not inflate the metric.
+
 ## Tests
 
 ```bash
