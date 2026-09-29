@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any
 from pydantic import ValidationError
 from agentic_suite.clients.groq_client import ModelResponse
@@ -58,12 +59,20 @@ def _validate(tool_cls: type[BaseTool], arguments: dict[str, Any]) -> str | None
 
     return None
 
+def _values_equal(want: object, got: object) -> bool:
+    if isinstance(want, str) and isinstance(got, str):
+        try:
+            return datetime.fromisoformat(want) == datetime.fromisoformat(got)
+        except ValueError:
+            pass
+    return type(want) is type(got) and want == got
+
 def _arguments_match(expected: dict[str, Any] | None, flexible: list[str], actual: dict[str, Any]) -> str | None:
     for key, want in (expected or {}).items():
         if key not in actual:
             return f"missing argument '{key}'"
         got = actual[key]
-        if got != want or type(got) is not type(want):
+        if not _values_equal(want, got):
             return f"argument '{key}': expected {want!r} ({type(want).__name__}), got {got!r} ({type(got).__name__})"
 
     for key in flexible:

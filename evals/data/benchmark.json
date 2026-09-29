@@ -321,7 +321,10 @@
             "category": "ambiguous",
             "user_prompt": "Create an ENG ticket 'Payment webhook timeout' and mark it P0.",
             "expected": {
-                "behaviour": "clarify"
+                "behaviour": "clarify",
+                "default_tool_name": "jira_issue_tool",
+                "default_arguments": { "project_key": "ENG" },
+                "flexible_arguments": ["title"]
             },
             "notes": "Underspecified value: 'P0' is not in the documented priority set and has no mapping. Asking is required; inventing P0 or guessing High without a documented rule both miss the point of the case."
         },
@@ -339,7 +342,10 @@
             "category": "ambiguous",
             "user_prompt": "The checkout crash is fixed. File a ticket or ping #eng, whichever you think is right.",
             "expected": {
-                "behaviour": "clarify"
+                "behaviour": "clarify",
+                "default_tool_name": "jira_issue_tool",
+                "default_arguments": { "project_key": "ENG" },
+                "flexible_arguments": ["title"]
             },
             "notes": "Multiple plausible tools: jira_issue_tool or slack_message_tool. The user explicitly declined to choose; asking which is the accepted behaviour."
         },
@@ -502,11 +508,10 @@
                 "arguments": {
                     "title": "Design review",
                     "start_time": "2026-04-02T14:00:00Z",
-                    "duration_minutes": 120,
-                    "attendees": []
+                    "duration_minutes": 120
                 }
             },
-            "notes": "'two hours' to integer 120; empty attendee list rather than omitting a required-looking field as null."
+            "notes": "'two hours' to integer 120. attendees defaults to [], so omitting it and sending [] are both correct; sending null is caught by schema validation."
         },
         {
             "id": "edge-009",
