@@ -69,7 +69,8 @@ async def run_sweep(cases: list[BenchmarkCase], model: str) -> RunSummary:
 def write_results(summary: RunSummary, label: str) -> Path:
     RESULTS_DIR.mkdir(exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
-    path = RESULTS_DIR / f'{label}-{summary.model}-{stamp}.json'
+    model_slug = summary.model.replace('/', '-')
+    path = RESULTS_DIR / f'{label}-{model_slug}-{stamp}.json'
     path.write_text(json.dumps(summary.to_dict(), indent=2), encoding='utf-8')
 
     return path
