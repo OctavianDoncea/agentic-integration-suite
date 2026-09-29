@@ -75,9 +75,5 @@ markers = [
     "sweep: full eval sweep: burns quota, run deliberately"
 ]
 
-[tool.ruff]
-line-length = 200
-target-version = "py311"
-
 [tool.coverage.run]
 source = ["src"]
