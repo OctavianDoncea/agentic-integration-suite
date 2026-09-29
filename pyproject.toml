@@ -40,7 +40,6 @@ dev = [
     "pytest-cov",
     "freezegun",
     "respx",
-    "ruff",
     "build",
     "twine",
 ]
