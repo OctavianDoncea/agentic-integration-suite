@@ -14,10 +14,11 @@ from agentic_suite.tools.mock.jira_tool import JiraIssueTool
 from agentic_suite.tools.mock.slack_tool import SlackMessageTool
 from evals.schema import BenchmarkCase, load_benchmark
 from evals.scoring import RunSummary, score_case
+from agentic_suite.middleware.retry import with_retry
 
 SYSTEM_PROMPT_PATH = Path(__file__).parent / 'data' / 'system_prompt.txt'
 RESULTS_DIR = Path(__file__).parent / 'results'
-MAX_CONCURRENCY = 4
+MAX_CONCURRENCY = 1
 REGRESSION_THRESHOLD = 0.0
 
 def build_registry() -> ToolRegistry:
@@ -32,14 +33,18 @@ def resolve_model() -> str:
     return os.environ.get('EVAL_MODEL') or settings.groq_model_full
 
 async def run_case(case: BenchmarkCase, client: GroqClient, registry: ToolRegistry, system_prompt: str, semaphore: asyncio.Semaphore) -> ModelResponse:
-    async with semaphore:
+    @with_retry(max_attempts=5, max_wait=60.0)
+    async def call():
         return await client.complete(
-            messages = [
+            messages=[
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': case.user_prompt},
             ],
-            tools = registry.get_schema_for_all()
+            tools=registry.get_schema_for_all()
         )
+
+    async with semaphore:
+        return await call()
 
 async def run_sweep(cases: list[BenchmarkCase], model: str) -> RunSummary:
     registry = build_registry()

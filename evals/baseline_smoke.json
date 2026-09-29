@@ -1,0 +1,95 @@
+{
+  "model": "openai/gpt-oss-20b",
+  "run_at": "2026-09-29T09:37:45.184996+00:00",
+  "total": 5,
+  "passed": 5,
+  "pass_rate": 1.0,
+  "selection_accuracy": 1.0,
+  "argument_precision": 1.0,
+  "by_category": {
+    "direct_intent": {
+      "total": 5,
+      "passed": 5,
+      "pass_rate": 1.0
+    }
+  },
+  "results": [
+    {
+      "case_id": "direct-001",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "priority": "High",
+        "project_key": "ENG",
+        "title": "Fix login redirect loop"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-002",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "pr_id": 4471,
+        "repo": "vercel/next.js"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-003",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "slack_message_tool",
+      "actual_arguments": {
+        "channel": "#releases",
+        "message": "Deploy to production finished successfully"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-004",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "priority": "Low",
+        "project_key": "PLATFORM",
+        "title": "Update dependency lockfile"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-005",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "pr_id": 12,
+        "repo": "octocat/hello-world"
+      },
+      "response_text": null
+    }
+  ]
+}
