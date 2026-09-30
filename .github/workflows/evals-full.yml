@@ -50,7 +50,7 @@ jobs:
       - name: Verify the API key is present
         run: |
           if [ -z "${GROQ_API_KEY}" ]; then
-            echo "::error::"GROQ_API_KEY secret is not set."
+            echo "::error::GROQ_API_KEY secret is not set."
             exit 1
           fi
 
