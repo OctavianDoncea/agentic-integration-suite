@@ -73,6 +73,7 @@ markers = [
     "smoke: fast eval subset safe to run on every push",
     "sweep: full eval sweep: burns quota, run deliberately"
 ]
+addopts = "-m 'not smoke and not sweep'"
 
 [tool.coverage.run]
 source = ["src"]
