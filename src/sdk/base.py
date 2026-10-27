@@ -35,6 +35,12 @@ class BaseTool(BaseModel, ABC):
 
     tool_name: ClassVar[str | None] = None
     tool_description: ClassVar[str | None] = None
+    display_title: ClassVar[str | None] = None
+    read_only: ClassVar[bool] = False
+    destructive: ClassVar[bool] = True
+    idempotent: ClassVar[bool] = False
+    open_world: ClassVar[bool] = True
+    simulated: ClassVar[bool] = False
 
     @abstractmethod
     async def execute(self, **kwargs: Any) -> dict[str, Any]:
