@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     sql_echo: bool = False
     oauth_state_ttl_seconds: int = 600
 
+    agent_api_key: str | None = None
+    agent_model: str | None = None
+    default_slack_team_id: str | None = None
+
     @field_validator("app_base_url")
     def _strip_trailing_slash(cls, value: str) -> str:
         return value.rstrip("/")

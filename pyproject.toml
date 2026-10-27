@@ -31,6 +31,7 @@ dependencies = [
     "alembic",
     "psycopg2-binary",
     "cryptography",
+    "aiohttp"
 ]
 
 [project.optional-dependencies]
@@ -55,6 +56,7 @@ Repository = "https://github.com/OctavianDoncea/agentic-integration-suite"
 package-dir = { "agentic_suite" = "src" }
 packages = [
     "agentic_suite",
+    "agentic_suite.agents",
     "agentic_suite.sdk",
     "agentic_suite.tools",
     "agentic_suite.tools.mock",
@@ -77,3 +79,6 @@ addopts = "-m 'not smoke and not sweep'"
 
 [tool.coverage.run]
 source = ["src"]
+
+[tool.setuptools.package-data]
+"agentic_suite.agent" = ["system_prompt.txt"]
