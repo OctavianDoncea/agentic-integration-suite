@@ -1,16 +1,24 @@
 """FastAPI application: Slack install and OAuth callback endpoints, handles events"""
 from __future__ import annotations
+import hmac
 import logging
 import json
-from fastapi import Depends, FastAPI, Query, Request
+from fastapi import Depends, FastAPI, Query, Request, Header, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, PlainTextResponse
 from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
 from agentic_suite.config import get_settings
 from agentic_suite.db import get_session
 from agentic_suite.integrations.slack.oauth import InvalidOAuthStateError, TokenExchangeError, build_authorize_url, exchange_code_for_token, generate_state, persist_installation, verify_state
 from agentic_suite.integrations.slack.signature import check_slack_signature, SIGNATURE_HEADER, TIMESTAMP_HEADER
 from agentic_suite.integrations.slack.events import dispatcher, deduplicator
 from agentic_suite.logging_config import configure_logging
+from agentic_suite.agents.context import resolve_team_id
+from agentic_suite.agents.executor import ToolExecutor
+from agentic_suite.agents.loop import run_agent
+from agentic_suite.agents.registry import build_live_registry
+from agentic_suite.clients.base import ChatClient
+from agentic_suite.clients.groq_client import GroqClient
 
 logger = logging.getLogger(__name__)
 configure_logging()
@@ -100,3 +108,40 @@ async def slack_events(request: Request):
 
     logger.info(f'Ignoring unrecognized Slack payload type: {payload_type}')
     return JSONResponse({'ok': True, 'status': 'ignored'})
+
+live_executor = ToolExecutor(build_live_registry())
+
+def get_executor() -> ToolExecutor:
+    return live_executor
+
+def get_chat_client() -> ChatClient:
+    settings = get_settings()
+    return GroqClient(model=settings.agent_model or settings.groq_model_full)
+
+def require_agent_key(x_agent_key: str | None = Header(default=None)) -> None:
+    expected = get_settings().agent_api_key
+
+    if not expected:
+        raise HTTPException(status_code=503, detail='Agent endpoint disabled: AGENT_API_KEY is not set.')
+
+    if not x_agent_key or not hmac.compare_digest(x_agent_key.encode(), expected.encode()):
+        raise HTTPException(status_code=401, detail='Invalid or missing X-Agent-Key header.')
+
+class AgentRunRequest(BaseModel):
+    prompt: str = Field(min_length=1, max_length=2000)
+    team_id: str | None = None
+
+
+@app.post('/agent/run', tags=['agent'], dependencies=[Depends(require_agent_key)])
+async def agent_run(body: AgentRunRequest, session: Session = Depends(get_session), client: ChatClient = Depends(get_chat_client), executor: ToolExecutor = Depends(get_executor)):
+    """Run one request through the model and the live tools."""
+
+    runtime_context = {'session': session, 'team_id': resolve_team_id(session, body.team_id)}
+
+    try:
+        result = await run_agent(body.prompt, client=client, executor=executor, runtime_context=runtime_context)
+    except Exception:
+        logger.exception('Agent run failed')
+        raise HTTPException(status_code=502, detail='The model provider failed. Try again shortly.')
+
+    return result.to_dict()
