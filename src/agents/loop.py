@@ -5,7 +5,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Literal
 from agentic_suite.agents.executor import ToolExecutor, tool_error_payload
-from agentic_suite.agent.prompt import load_system_prompt
+from agentic_suite.agents.prompt import load_system_prompt
 from agentic_suite.clients.base import ChatClient
 from agentic_suite.middleware.retry import with_retry
 

@@ -60,7 +60,7 @@ class FakeSlackClient:
 
     async def chat_postMessage(self, *, channel: str, text: str) -> dict[str, Any]:
         self.posts.append((channel, text))
-        failing = self._fail_times is None or len(self.posts) < self._fail_times
+        failing = self._fail_times is None or len(self.posts) <= self._fail_times
 
         if self._timeout and failing:
             raise asyncio.TimeoutError()

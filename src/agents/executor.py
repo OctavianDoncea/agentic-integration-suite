@@ -41,12 +41,12 @@ class ToolExecutor:
 
     @property
     def breaker_names(self) -> list[str]:
-        return sorted(self._breaker)
+        return sorted(self._breakers)
 
     def breaker_for(self, tool_name: str) -> CircuitBreaker:
         """One breaker per tool: a Slack outage must not shed Jira calls."""
 
-        breaker = self._breaker.get(tool_name)
+        breaker = self._breakers.get(tool_name)
         if breaker is None:
             breaker = CircuitBreaker(name=tool_name, failure_threshold=self._failure_threshold, cooldown_seconds=self._cooldown_seconds, clock=self._clock)
             self._breakers[tool_name] = breaker
