@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 import pytest
+from agentic_suite.agents.prompt import load_system_prompt
 from agentic_suite.clients.groq_client import GroqClient, ModelResponse
 from agentic_suite.config import get_settings
 from agentic_suite.sdk.registry import ToolRegistry
@@ -17,7 +18,6 @@ from evals.scoring import RunSummary, score_case
 from agentic_suite.middleware.retry import with_retry
 from evals.threshold import BASELINE_FULL_MODEL, BASELINE_SMOKE_MODEL, FULL_THRESHOLD, SMOKE_THRESHOLD
 
-SYSTEM_PROMPT_PATH = Path(__file__).parent / 'data' / 'system_prompt.txt'
 RESULTS_DIR = Path(__file__).parent / 'results'
 MAX_CONCURRENCY = 1
 MAX_ATTEMPTS = 5
@@ -51,7 +51,7 @@ async def run_case(case: BenchmarkCase, client: GroqClient, registry: ToolRegist
 async def run_sweep(cases: list[BenchmarkCase], model: str) -> RunSummary:
     registry = build_registry()
     client = GroqClient(model=model)
-    system_prompt = SYSTEM_PROMPT_PATH.read_text(encoding='utf-8')
+    system_prompt = load_system_prompt()
     semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
     responses = await asyncio.gather(*(run_case(c, client, registry, system_prompt, semaphore) for c in cases), return_exceptions=True)
     results: list[CaseResult] = []
