@@ -59,6 +59,7 @@ def get_retry_after(exc: BaseException) -> float | None:
     return max(0.0, value)
 
 def is_retryable(exc: BaseException) -> bool:
+    """Default predicate: transient server-side failures only."""
     from agentic_suite.middleware.circuit_breaker import CircuitOpenError
 
     if isinstance(exc, CircuitOpenError):
@@ -68,6 +69,8 @@ def is_retryable(exc: BaseException) -> bool:
         return True
 
     status = getattr(exc, 'status', None)
+    if status is None:
+        status = getattr(exc, 'status_code', None)
     if status is None:
         status = getattr(getattr(exc, 'response', None), 'status_code', None)
 

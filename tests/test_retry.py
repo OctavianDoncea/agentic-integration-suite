@@ -19,6 +19,15 @@ class SleepRecorder:
     def call_count(self) -> int:
         return len(self.delays)
 
+
+class ProviderStyleError(Exception):
+    """Shape of provider SDK errors: status-code plus a headers dict."""
+
+    def __init__(self, status_code: int, headers: dict | None = None):
+        self.status_code = status_code
+        self.headers = headers or {}
+
+
 def fixed_rng(value: float = 1.0) -> Callable[[], float]:
     return lambda: value
 
@@ -216,3 +225,11 @@ def test_decorator_preserves_function_metadata():
 def test_zero_max_attempts_is_rejected_at_decoration_time():
     with pytest.raises(ValueError, match='at least 1'):
         with_retry(max_attempts=0)
+
+def test_provider_sdk_errors_are_classified_by_status_code():
+    assert is_retryable(ProviderStyleError(429)) is True
+    assert is_retryable(ProviderStyleError(503)) is True
+    assert is_retryable(ProviderStyleError(400)) is False
+
+def test_provider_retry_after_header_is_read():
+    assert get_retry_after(ProviderStyleError(429, {'retry-after': 2})) == 2.0
