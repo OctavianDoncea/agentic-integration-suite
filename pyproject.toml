@@ -31,7 +31,8 @@ dependencies = [
     "alembic",
     "psycopg2-binary",
     "cryptography",
-    "aiohttp"
+    "aiohttp",
+    "mcp"
 ]
 
 [project.optional-dependencies]
@@ -83,3 +84,6 @@ source = ["src"]
 
 [tool.setuptools.package-data]
 "agentic_suite.agents" = ["system_prompt.txt"]
+
+[project.scripts]
+agentic-suite-mcp = "agentic_suite.mcp_server:main"
