@@ -18,6 +18,9 @@ class GitHubPRTool(BaseTool):
     repo: str = Field(description="Repository in 'owner/name' form")
     pr_id: int = Field(ge=1, description='Pull request number.')
     inject_429_rate_limit: bool = ConfigField(False)
+    display_title = 'Get pull request status'
+    read_only = True
+    simulated = True
 
     async def execute(self, **kwargs: Any) -> dict[str, Any]:
         if self.inject_429_rate_limit:

@@ -8,6 +8,8 @@ class SlackMessageTool(BaseTool):
     """Post a message to a Slack channel."""
     channel: str = Field(description="Target channel, e.g. '#general'.")
     message: str = Field(min_length=1, max_length=4000, description='Message text.')
+    destructive = False
+    simulated = True
 
     @field_validator('channel')
     @classmethod

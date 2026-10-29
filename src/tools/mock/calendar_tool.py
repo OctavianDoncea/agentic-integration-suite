@@ -18,6 +18,10 @@ class CalendarEventTool(BaseTool):
         default='private', description='Event visibility.'
     )
     send_invites: bool = Field(default=True, description='Email the attendees.')
+    display_title = 'Schedule calendar event'
+    destructive = False
+    idempotent = False
+    simulated = True
 
     async def execute(self, **kwargs: Any) -> dict[str, Any]:
         return {

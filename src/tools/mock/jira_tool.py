@@ -18,6 +18,10 @@ class JiraIssueTool(BaseTool):
     priority: str = Field(description="Issue priority, e.g. 'Low', 'Medium', 'High'.")
     project_key: str = Field(min_length=2, max_length=10, description="Jira project key, e.g. 'ENG'.")
     inject_500_error: bool = ConfigField(False)
+    display_title = 'Create Jira issue'
+    destructive = False
+    idempotent = False
+    simulated = True
 
     async def execute(self, **kwargs: Any) -> dict[str, Any]:
         if self.inject_500_error:
