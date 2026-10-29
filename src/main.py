@@ -19,6 +19,7 @@ from agentic_suite.agents.loop import run_agent
 from agentic_suite.agents.registry import build_live_registry
 from agentic_suite.clients.base import ChatClient
 from agentic_suite.clients.groq_client import GroqClient
+from agentic_suite.clients.factory import make_chat_client
 
 logger = logging.getLogger(__name__)
 configure_logging()
@@ -116,7 +117,7 @@ def get_executor() -> ToolExecutor:
 
 def get_chat_client() -> ChatClient:
     settings = get_settings()
-    return GroqClient(model=settings.agent_model or settings.groq_model_full)
+    return make_chat_client(settings.agent_model or settings.groq_model_full)
 
 def require_agent_key(x_agent_key: str | None = Header(default=None)) -> None:
     expected = get_settings().agent_api_key
