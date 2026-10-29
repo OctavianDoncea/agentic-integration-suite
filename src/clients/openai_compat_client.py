@@ -14,7 +14,7 @@ DEFAULT_TIMEOUT_SECONDS = 120.0
 
 class OpenAICompatClient:
     """Async client for OpenAI-compatible chat endpoints."""
-    provider = 'openai-compat'
+    provider = 'openai_compat'
 
     def __init__(
         self,
