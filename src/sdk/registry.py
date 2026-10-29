@@ -77,3 +77,7 @@ class ToolRegistry:
 
         log_invocation(tool_name, arguments, elapsed_ms(), 'success', retry_count)
         return result
+
+    def tools(self) -> list[type[BaseTool]]:
+        """Registered tool classes, in registration order."""
+        return list(self._tools.values())
