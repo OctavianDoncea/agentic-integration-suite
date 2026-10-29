@@ -32,7 +32,8 @@ dependencies = [
     "psycopg2-binary",
     "cryptography",
     "aiohttp",
-    "mcp"
+    "mcp",
+    "cohere"
 ]
 
 [project.optional-dependencies]

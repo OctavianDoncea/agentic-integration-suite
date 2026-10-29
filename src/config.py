@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     agent_model: str | None = None
     default_slack_team_id: str | None = None
 
+    cohere_api_key: str | None = None
+    cohere_thinking: str | None = None
+    openai_compat_base_url: str | None = None
+    openai_compat_api_key: str | None = None
+    openai_compat_adapt_schema: bool = False
+
     @field_validator("app_base_url")
     def _strip_trailing_slash(cls, value: str) -> str:
         return value.rstrip("/")

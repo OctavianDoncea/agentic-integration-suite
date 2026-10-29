@@ -19,7 +19,10 @@ FAKE_ENV = {
     "ENVIRONMENT": "ci",
     "AGENT_API_KEY": "",
     "AGENT_MODEL": "",
-    'DEFAULT_SLACK_TEAM_ID': ''
+    'DEFAULT_SLACK_TEAM_ID': '',
+    'COHERE_API_KEY': '',
+    'OPENAI_COMPAT_BASE_URL': '',
+    'OPENAI_COMPAT_API_KEY': ''
 }
 
 @pytest.fixture(autouse=True)
