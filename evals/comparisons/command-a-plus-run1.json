@@ -1,0 +1,802 @@
+{
+  "model": "cohere:command-a-plus-05-2026",
+  "run_at": "2026-10-29T20:41:55.710802+00:00",
+  "total": 50,
+  "passed": 46,
+  "pass_rate": 0.92,
+  "selection_accuracy": 0.92,
+  "argument_precision": 1.0,
+  "by_category": {
+    "direct_intent": {
+      "total": 15,
+      "passed": 15,
+      "pass_rate": 1.0
+    },
+    "ambiguous": {
+      "total": 15,
+      "passed": 12,
+      "pass_rate": 0.8
+    },
+    "edge_case_schema": {
+      "total": 20,
+      "passed": 19,
+      "pass_rate": 0.95
+    }
+  },
+  "results": [
+    {
+      "case_id": "direct-001",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Fix login redirect loop",
+        "priority": "High",
+        "project_key": "ENG"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-002",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "vercel/next.js",
+        "pr_id": 4471
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-003",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "slack_message_tool",
+      "actual_arguments": {
+        "channel": "#releases",
+        "message": "Deploy to production finished successfully"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-004",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Update dependency lockfile",
+        "priority": "Low",
+        "project_key": "PLATFORM"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-005",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "octocat/hello-world",
+        "pr_id": 12
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-006",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Sprint planning",
+        "start_time": "2026-03-14T09:30:00Z",
+        "duration_minutes": 60
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-007",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "slack_message_tool",
+      "actual_arguments": {
+        "channel": "#eng",
+        "message": "Incident war room is in huddle 3."
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-008",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Rotate TLS certificates",
+        "priority": "Medium",
+        "project_key": "INFRA"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-009",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "facebook/react",
+        "pr_id": 12345
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-010",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Design critique",
+        "start_time": "2026-04-02T15:00:00Z",
+        "duration_minutes": 45,
+        "attendees": [
+          "ana@example.com",
+          "alex@example.com"
+        ],
+        "visibility": "public"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-011",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "slack_message_tool",
+      "actual_arguments": {
+        "channel": "#alerts",
+        "message": "Pager is quiet"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-012",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Backfill orders warehouse",
+        "priority": "High",
+        "project_key": "DATA"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-013",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "kubernetes/kubernetes",
+        "pr_id": 999
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-014",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "1:1 with Sam",
+        "start_time": "2026-05-11T16:00:00Z",
+        "duration_minutes": 30,
+        "visibility": "private",
+        "send_invites": false
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "direct-015",
+      "category": "direct_intent",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "slack_message_tool",
+      "actual_arguments": {
+        "channel": "#design",
+        "message": "Mockups are in Figma"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "ambiguous-001",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "login bug",
+        "priority": "High",
+        "project_key": "ENG"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "ambiguous-002",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": null,
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I can help you check the status of pull request 88, but I need to know which repository you're referring to. The GitHub tool requires the repository name in 'owner/name' format (e.g., 'microsoft/vscode').\n\nCould you please specify the repository for pull request 88?"
+    },
+    {
+      "case_id": "ambiguous-003",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": null,
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I can help you post \"deploy complete\" to Slack, but I need to know which channel you'd like to post to. Could you please specify the Slack channel (e.g., #general, #deployments, etc.)?"
+    },
+    {
+      "case_id": "ambiguous-004",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": null,
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I can help you book that 30-minute public event titled 'Sync'. However, I need to know when you'd like the event to start. \n\nCould you please provide the start time for the event? It should be in a format like \"2026-03-14T09:30:00Z\" (ISO-8601 with timezone offset)."
+    },
+    {
+      "case_id": "ambiguous-005",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Flaky tests",
+        "priority": "High",
+        "project_key": "PLATFORM"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "ambiguous-006",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Cache stampede",
+        "priority": "High",
+        "project_key": "ENG"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "ambiguous-007",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Docs typo",
+        "priority": "Low",
+        "project_key": "ENG"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "ambiguous-008",
+      "category": "ambiguous",
+      "passed": false,
+      "selection_correct": false,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": "called 'jira_issue_tool' instead of asking",
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Payment webhook timeout",
+        "priority": "High",
+        "project_key": "ENG"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "ambiguous-009",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": null,
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I'd be happy to help let the team know about PR 12 being ready! However, I need a couple of details:\n\n1. Which repository is PR 12 in? (e.g., \"owner/repo-name\")\n2. Which Slack channel should I post the notification to? (e.g., \"#engineering\", \"#team-updates\")\n\nOnce you provide these, I can fetch the "
+    },
+    {
+      "case_id": "ambiguous-010",
+      "category": "ambiguous",
+      "passed": false,
+      "selection_correct": false,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": "called 'jira_issue_tool' instead of asking",
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Checkout crash fixed",
+        "priority": "Medium",
+        "project_key": "ENG"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "ambiguous-011",
+      "category": "ambiguous",
+      "passed": false,
+      "selection_correct": false,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": "called 'github_pr_tool' instead of asking",
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "octocat/hello-world",
+        "pr_id": 12
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "ambiguous-012",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": null,
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I'd be happy to help document the outage! However, I need a few details first:\n\n- What happened during the outage? (title/summary)\n- When did it occur? \n- How long did it last?\n- What's the priority/urgency? (High for critical issues, Medium for standard, Low for minor)\n\nOnce I have these details, I"
+    },
+    {
+      "case_id": "ambiguous-013",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": null,
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I don't have access to a tool that can retrieve code review SLA information. This would typically be documented in your team's internal wiki, project documentation, or CI/CD pipeline configuration.\n\nTo find your code review SLA, you might want to check:\n- Your team's internal documentation or wiki\n-"
+    },
+    {
+      "case_id": "ambiguous-014",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": null,
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I don't have access to tools that can retrieve company policies or documentation. Our policy on Friday deployments would typically be documented in our internal wiki, deployment runbooks, or shared through team communications.\n\nFor the most current and accurate information about Friday deployment po"
+    },
+    {
+      "case_id": "ambiguous-015",
+      "category": "ambiguous",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": null,
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I don't have access to tools that can check on-call schedules or roster information. The available tools are for GitHub pull requests, Slack messaging, Jira issue creation, and calendar events, but none can query who's currently on call.\n\nTo find the on-call engineer this week, you would need to che"
+    },
+    {
+      "case_id": "edge-001",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "slack_message_tool",
+      "actual_arguments": {
+        "channel": "#releases",
+        "message": "build green"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-002",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Pager duty flake",
+        "priority": "High",
+        "project_key": "OPS"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-003",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "facebook/react",
+        "pr_id": 471
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-004",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "octocat/hello-world",
+        "pr_id": 12
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-005",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "vercel/next.js",
+        "pr_id": 4471
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-006",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "github_pr_tool",
+      "actual_arguments": {
+        "repo": "kubernetes/kubernetes",
+        "pr_id": 204
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-007",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Sprint planning",
+        "start_time": "2026-03-14T09:30:00Z",
+        "duration_minutes": 60,
+        "attendees": [
+          "ana@example.com",
+          "alex@example.com"
+        ]
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-008",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Design review",
+        "start_time": "2026-04-02T14:00:00Z",
+        "duration_minutes": 120
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-009",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Coffee chat",
+        "start_time": "2026-05-01T11:00:00Z",
+        "duration_minutes": 30
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-010",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "1:1 with Ana",
+        "start_time": "2026-06-08T16:00:00Z",
+        "duration_minutes": 45,
+        "attendees": [
+          "ana@example.com"
+        ]
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-011",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Q2 All Hands",
+        "start_time": "2026-07-01T17:00:00Z",
+        "duration_minutes": 90,
+        "visibility": "public"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-012",
+      "category": "edge_case_schema",
+      "passed": false,
+      "selection_correct": false,
+      "arguments_valid": null,
+      "arguments_match": null,
+      "failure_reason": "no tool called; expected 'calendar_event_tool'",
+      "actual_tool_name": null,
+      "actual_arguments": {},
+      "response_text": "I can help you book that standup meeting. However, I need to know the specific date for \"tomorrow\" since I don't have access to the current date. Could you please provide the date you'd like the standup to be scheduled for (in YYYY-MM-DD format)?\n\nOnce you provide the date, I'll create a 15-minute p"
+    },
+    {
+      "case_id": "edge-013",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Retro",
+        "start_time": "2026-08-20T15:30:00Z",
+        "duration_minutes": 25
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-014",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Vendor call",
+        "start_time": "2026-09-09T09:00:00+00:00",
+        "duration_minutes": 40
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-015",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Planning",
+        "start_time": "2026-10-05T13:00:00Z",
+        "duration_minutes": 60,
+        "attendees": [
+          "ana@example.com",
+          "alex@example.com",
+          "john@example.com"
+        ]
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-016",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Offer review",
+        "start_time": "2026-11-03T12:00:00Z",
+        "duration_minutes": 20,
+        "visibility": "private",
+        "send_invites": false
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-017",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Quick sync",
+        "start_time": "2026-12-01T08:00:00Z",
+        "duration_minutes": 15,
+        "send_invites": true
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-018",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Kickoff: Q3 'ship' review",
+        "start_time": "2026-03-01T10:00:00Z",
+        "duration_minutes": 60
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-019",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "calendar_event_tool",
+      "actual_arguments": {
+        "title": "Workshop",
+        "start_time": "2026-01-15T13:00:00Z",
+        "duration_minutes": 90,
+        "visibility": "private"
+      },
+      "response_text": null
+    },
+    {
+      "case_id": "edge-020",
+      "category": "edge_case_schema",
+      "passed": true,
+      "selection_correct": true,
+      "arguments_valid": true,
+      "arguments_match": true,
+      "failure_reason": null,
+      "actual_tool_name": "jira_issue_tool",
+      "actual_arguments": {
+        "title": "Retry storm on checkout",
+        "priority": "Medium",
+        "project_key": "ENG"
+      },
+      "response_text": null
+    }
+  ]
+}
