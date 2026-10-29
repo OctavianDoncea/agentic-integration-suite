@@ -1,9 +1,10 @@
 from __future__ import annotations
 import logging
 import sys
+from typing import TextIO
 from agentic_suite.config import get_settings
 
-def configure_logging() -> None:
+def configure_logging(stream: TextIO | None = None) -> None:
     stream = stream or sys.stdout
     settings = get_settings()
     
