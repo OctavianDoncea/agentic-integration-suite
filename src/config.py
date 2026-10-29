@@ -1,11 +1,9 @@
 from __future__ import annotations
-
+import os
 from functools import lru_cache
 from typing import Literal
-
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -23,7 +21,7 @@ class Settings(BaseSettings):
         'python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
     )
 
-    groq_model_smoke: str = "llama-3.1-8b-instant"
+    groq_model_smoke: str = "openai/gpt-oss-20b"
     groq_model_full: str = "openai/gpt-oss-120b"
     app_base_url: str = "http://localhost:8000"
     slack_bot_scopes: str = "chat:write,channels:read"
@@ -51,4 +49,4 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    return Settings()
+    return Settings(_env_file=os.environ.get('AGENTIC_SUITE_ENV_FILE', '.env'))
