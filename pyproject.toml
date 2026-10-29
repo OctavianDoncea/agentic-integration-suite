@@ -82,4 +82,4 @@ addopts = "-m 'not smoke and not sweep'"
 source = ["src"]
 
 [tool.setuptools.package-data]
-"agentic_suite.agent" = ["system_prompt.txt"]
+"agentic_suite.agents" = ["system_prompt.txt"]
