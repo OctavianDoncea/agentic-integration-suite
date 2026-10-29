@@ -51,7 +51,7 @@ def parse_tool_argument(name: str, arguments_text: str | None, call_id: str = ''
     return ToolCall(name, arguments, text, None, call_id)
 
 def openai_assistant_turn(response: ModelResponse) -> dict[str, Any]:
-    message: dict[str, Any] = {'role': 'assistant', 'content': response.text}
+    message: dict[str, Any] = {'role': 'assistant', 'content': response.text or ''}
 
     if response.tool_calls:
         message['tool_calls'] = [

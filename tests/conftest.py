@@ -22,7 +22,8 @@ FAKE_ENV = {
     'DEFAULT_SLACK_TEAM_ID': '',
     'COHERE_API_KEY': '',
     'OPENAI_COMPAT_BASE_URL': '',
-    'OPENAI_COMPAT_API_KEY': ''
+    'OPENAI_COMPAT_API_KEY': '',
+    'OPENAI_COMPAT_ADAPT_SCHEMA': 'false',
 }
 
 @pytest.fixture(autouse=True)
