@@ -1,6 +1,6 @@
 {
   "model": "groq:openai/gpt-oss-20b",
-  "run_at": "2026-10-29T21:08:01.893290+00:00",
+  "run_at": "2026-10-29T21:28:23.048654+00:00",
   "total": 50,
   "passed": 44,
   "pass_rate": 0.88,
@@ -397,7 +397,7 @@
       "failure_reason": "called 'jira_issue_tool' instead of asking",
       "actual_tool_name": "jira_issue_tool",
       "actual_arguments": {
-        "priority": "?",
+        "priority": "Medium",
         "project_key": "ENG",
         "title": "Checkout crash fixed"
       },
@@ -425,7 +425,7 @@
       "failure_reason": null,
       "actual_tool_name": null,
       "actual_arguments": {},
-      "response_text": "Could you provide a brief title for the Jira issue and let me know the priority (Low, Medium, High)?"
+      "response_text": "Could you provide a brief title for the Jira issue?"
     },
     {
       "case_id": "ambiguous-013",
