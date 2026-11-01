@@ -1,0 +1,1 @@
+"""Adversarial evaluation: does text returned by a tool steer the agent into a write?"""
