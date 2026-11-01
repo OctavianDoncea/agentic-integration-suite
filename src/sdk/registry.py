@@ -81,3 +81,7 @@ class ToolRegistry:
     def tools(self) -> list[type[BaseTool]]:
         """Registered tool classes, in registration order."""
         return list(self._tools.values())
+
+    def get_tool(self, name: str) -> type[BaseTool] | None:
+        """The registered tool class for a wire name, or None."""
+        return self._tools.get(name)

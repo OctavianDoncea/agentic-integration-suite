@@ -10,6 +10,7 @@ class SlackMessageTool(BaseTool):
     message: str = Field(min_length=1, max_length=4000, description='Message text.')
     destructive = False
     simulated = True
+    target_fields = ('channel',)
 
     @field_validator('channel')
     @classmethod

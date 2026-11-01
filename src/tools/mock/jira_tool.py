@@ -22,6 +22,7 @@ class JiraIssueTool(BaseTool):
     destructive = False
     idempotent = False
     simulated = True
+    target_fields = ('project_key',)
 
     async def execute(self, **kwargs: Any) -> dict[str, Any]:
         if self.inject_500_error:

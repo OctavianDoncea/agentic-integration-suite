@@ -49,6 +49,7 @@ class SlackPostMessageTool(BaseTool):
     display_title = 'Post to Slack'
     destructive = False
     idempotent = False
+    target_fields = ('channel',)
 
     channel: str = Field(description="Target channel, e.g. '#general'.")
     message: str = Field(min_length=1, max_length=4000, description='Message text.')

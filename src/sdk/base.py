@@ -41,6 +41,7 @@ class BaseTool(BaseModel, ABC):
     idempotent: ClassVar[bool] = False
     open_world: ClassVar[bool] = True
     simulated: ClassVar[bool] = False
+    target_fields: ClassVar[tuple[str, ...]] = ()
 
     @abstractmethod
     async def execute(self, **kwargs: Any) -> dict[str, Any]:

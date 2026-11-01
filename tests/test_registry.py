@@ -71,3 +71,10 @@ async def test_runtime_context_is_passed_to_execute_but_not_validated():
     reg.register(ContextAwareTool)
     result = await reg.execute('context_aware_tool', {'value': 'x'}, db_session='fake-session_object')
     assert result['db_session'] == 'fake-session_object'
+
+def test_get_tool_looks_up_by_wire_name():
+    registry = ToolRegistry()
+    registry.register(JiraIssueTool)
+
+    assert registry.get_tool('jira_issue_tool') is JiraIssueTool
+    assert registry.get_tool('no_such_tool') is None
