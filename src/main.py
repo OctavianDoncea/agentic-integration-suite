@@ -17,6 +17,7 @@ from agentic_suite.agents.context import resolve_team_id
 from agentic_suite.agents.executor import ToolExecutor
 from agentic_suite.agents.loop import run_agent
 from agentic_suite.agents.registry import build_live_registry
+from agentic_suite.agents.policy import WritePolicy
 from agentic_suite.clients.base import ChatClient
 from agentic_suite.clients.groq_client import GroqClient
 from agentic_suite.clients.factory import make_chat_client
@@ -131,6 +132,8 @@ def require_agent_key(x_agent_key: str | None = Header(default=None)) -> None:
 class AgentRunRequest(BaseModel):
     prompt: str = Field(min_length=1, max_length=2000)
     team_id: str | None = None
+    allow_writes: bool = False
+    write_tools: list[str] | None = Field(default=None, max_length=20)
 
 
 @app.post('/agent/run', tags=['agent'], dependencies=[Depends(require_agent_key)])
@@ -138,9 +141,10 @@ async def agent_run(body: AgentRunRequest, session: Session = Depends(get_sessio
     """Run one request through the model and the live tools."""
 
     runtime_context = {'session': session, 'team_id': resolve_team_id(session, body.team_id)}
+    policy = WritePolicy(allow_writes=body.allow_writes, allowed_tools=frozenset(body.write_tools) if body.write_tools is not None else None)
 
     try:
-        result = await run_agent(body.prompt, client=client, executor=executor, runtime_context=runtime_context)
+        result = await run_agent(body.prompt, client=client, executor=executor, runtime_context=runtime_context, policy=policy)
     except Exception:
         logger.exception('Agent run failed')
         raise HTTPException(status_code=502, detail='The model provider failed. Try again shortly.')
