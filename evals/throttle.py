@@ -4,7 +4,9 @@ import asyncio
 import os
 import time
 from collections.abc import Callable, Awaitable
+from typing import Any
 from agentic_suite.clients.factory import PROVIDERS
+from agentic_suite.clients.base import ChatClient, ModelResponse, ToolCall
 
 def resolve_rpm(provider: str) -> float | None:
     override = os.environ.get('EVAL_RPM', '').strip()
@@ -38,3 +40,25 @@ class MinIntervalLimiter:
                 now = self._next_allowed
 
             self._next_allowed = now + self._interval
+
+
+class ThrottledClient:
+    """Spaces every model call, including the ones made inside the agent loop."""
+
+    def __init__(self, inner: ChatClient, limiter: MinIntervalLimiter) -> None:
+        self._inner = inner
+        self._limiter = limiter
+
+    @property
+    def model(self) -> str:
+        return self._inner.model
+
+    async def complete(self, messages: list[Any], tools: list[dict[str, Any]] | None = None, **kwargs: Any) -> ModelResponse:
+        await self._limiter.wait()
+        return await self._inner.complete(messages, tools, **kwargs)
+
+    def format_assistant_turn(self, response: ModelResponse) -> Any:
+        return self._inner.format_assistant_turn(response)
+
+    def format_tool_result(self, call: ToolCall, content: Any) -> Any:
+        return self._inner.format_tool_result(call, content)

@@ -11,13 +11,13 @@ from typing import Any
 from agentic_suite.agents.executor import ToolExecutor
 from agentic_suite.agents.loop import DEFAULT_MAX_STEPS, run_agent
 from agentic_suite.agents.policy import WritePolicy
-from agentic_suite.clients.base import ChatClient, ModelResponse, ToolCall
+from agentic_suite.clients.base import ChatClient
 from agentic_suite.clients.factory import infer_provider, make_chat_client
 from evals.adversarial.schema import AdversarialCase, load_cases
 from evals.adversarial.scoring import CaseScore, score_case, summarize
 from evals.adversarial.tools import build_adversarial_registry
 from evals.compare import wilson_interval
-from evals.throttle import MinIntervalLimiter, resolve_rpm
+from evals.throttle import MinIntervalLimiter, ThrottledClient, resolve_rpm
 
 RESULTS_DIR = Path(__file__).parent / 'results'
 
@@ -37,28 +37,6 @@ ARMS: dict[str, Arm] = {
 
 async def _no_sleep(_: float) -> None:
     return None
-
-class ThrottledClient:
-    """Spaces every model call, including the ones made inside the agent loop."""
-
-    def __init__(self, inner: ChatClient, limiter: MinIntervalLimiter) -> None:
-        self._inner = inner
-        self._limiter = limiter
-
-    @property
-    def model(self) -> str:
-        return self._inner.model
-
-    async def complete(self, messages: list[Any], tools: list[dict[str, Any]] | None = None, **kwargs: Any) -> ModelResponse:
-        await self._limiter.wait()
-        return await self._inner.complete(messages, tools, **kwargs)
-
-    def format_assistant_turn(self, response: ModelResponse) -> Any:
-        return self._inner.format_assistant_turn(response)
-
-    def format_tool_result(self, call: ToolCall, content: str) -> Any:
-        return self._inner.format_tool_result(call, content)
-
 
 async def run_arm(cases: list[AdversarialCase], arm: Arm, client: ChatClient, *, max_steps: int = DEFAULT_MAX_STEPS) -> tuple[list[CaseScore], list[dict[str, str]]]:
     scores: list[CaseScore] = []

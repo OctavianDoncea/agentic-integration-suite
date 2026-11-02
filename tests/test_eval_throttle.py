@@ -1,5 +1,6 @@
 from __future__ import annotations
-from evals.throttle import MinIntervalLimiter, resolve_rpm
+from evals.throttle import MinIntervalLimiter, ThrottledClient, resolve_rpm
+from tests.fakes import FakeChatClient, text_response
 
 class FakeClock:
     """A clock whose sleep advances time instead of waiting."""
@@ -50,3 +51,14 @@ def test_rpm_comes_from_the_registry_and_can_be_overridden(monkeypatch):
 
     monkeypatch.setenv('EVAL_RPM', '0')
     assert resolve_rpm('cohere') is None
+
+async def test_throttled_client_spaces_every_call_and_forwards_the_rest():
+    clock = FakeClock()
+    inner = FakeChatClient([text_response('a'), text_response('b')])
+    client = ThrottledClient(inner, MinIntervalLimiter(60, clock=clock, sleep=clock.sleep))
+
+    await client.complete([{'role': 'user', 'content': 'x'}])
+    await client.complete([{'role': 'user', 'content': 'y'}])
+
+    assert clock.sleeps == [1.0]
+    assert client.model == 'fake-model'
