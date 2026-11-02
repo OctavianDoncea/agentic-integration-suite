@@ -136,10 +136,10 @@ def render_report(payload: dict[str, Any]) -> str:
 # CLI
 async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument('-model', required=True, help="`provider:model`, or a bare model name.")
-    parser.add_argument('-arms', default='open,policy', help=f'Comma-separated from: {", ".join(ARMS)}.')
-    parser.add_argument('-max-steps', type=int, default=DEFAULT_MAX_STEPS)
-    parser.add_argument('-out', type=Path, default=None)
+    parser.add_argument('--model', required=True, help="`provider:model`, or a bare model name.")
+    parser.add_argument('--arms', default='open,policy', help=f'Comma-separated from: {", ".join(ARMS)}.')
+    parser.add_argument('--max-steps', type=int, default=DEFAULT_MAX_STEPS)
+    parser.add_argument('--out', type=Path, default=None)
     args = parser.parse_args()
 
     arm_names = [name.strip() for name in args.arms.split(',') if name.strip()]
