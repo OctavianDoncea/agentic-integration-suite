@@ -56,7 +56,7 @@ def test_posts_to_slack_end_to_end(agent_key, wire, slack_factory):
             text_response('Posted to #general.'),
         ]
     )
-    response = post({'prompt': 'Tell #general we shipped'})
+    response = post({'prompt': 'Tell #general we shipped', 'allow_writes': True})
 
     assert response.status_code == 200
     body = response.json()
@@ -77,7 +77,7 @@ def test_missing_workspace_becomes_a_tool_error_not_a_crash(agent_key, wire, sla
             text_response('Slack isn\'t connected.'),
         ]
     )
-    response = post({'prompt': 'Say hi in #general'})
+    response = post({'prompt': 'Say hi in #general', 'allow_writes': True})
 
     assert response.status_code == 200
     assert response.json()["steps"][0] == {
@@ -93,3 +93,34 @@ def test_model_failure_is_a_502(agent_key, wire):
 def test_prompt_length_is_bounded(agent_key, wire):
     wire['client'] = FakeChatClient([])
     assert post({'prompt': 'x' * 2001}).status_code == 422
+
+def test_writes_are_previews_by_default(agent_key, wire, slack_factory):
+    args = {'channel': '#general', 'message': 'Shipped!'}
+    wire['client'] = FakeChatClient([tool_call_response('slack_message_tool', args), text_response('I would post it.')])
+    response = post({'prompt': 'Tell #general we shipped'})
+
+    assert response.status_code == 200
+    assert response.json()['steps'] == [{'tool': 'slack_message_tool', 'status': 'preview', 'error': None, 'arguments': args}]
+    assert slack_factory.client.posts == []
+
+def test_a_target_the_user_didnt_name_is_blocked(agent_key, wire, slack_factory):
+    args = {'channel': '#random', 'message': 'Shipped!'}
+    wire['client'] = FakeChatClient([tool_call_response('slack_message_tool', args), text_response("I couldn't post that.")])
+    response = post({'prompt': 'Tell #general we shipped', 'allow_writes': True})
+
+    step = response.json()['steps'][0]
+    assert (step['status'], step['error']) == ('blocked', 'target_not_in_request')
+    assert slack_factory.client.posts == []
+
+def test_write_tools_restricts_which_tools_may_run(agent_key, wire, slack_factory):
+    args = {'channel': '#general', 'message': 'Shipped!'}
+    wire['client'] = FakeChatClient([tool_call_response('slack_message_tool', args), text_response('Not allowed.')])
+    response = post({'prompt': 'Tell #general we shipped', 'allow_writes': True, 'write_tools': ['jira_issue_tool']})
+
+    step = response.json()['steps'][0]
+    assert (step['status'], step['error']) == ('blocked', 'tool_not_allowed')
+    assert slack_factory.client.posts == []
+
+def test_write_tools_must_be_a_list(agent_key, wire):
+    wire['client'] = FakeChatClient([])
+    assert post({'prompt': 'hi', 'write_tools': 'slack_message_tool'}).status_code == 422
