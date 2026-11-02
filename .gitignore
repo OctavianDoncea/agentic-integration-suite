@@ -26,4 +26,3 @@ evals/*.local.json
 
 evals/run1.json
 evals/run2.json
-evals/adversarial/results/
