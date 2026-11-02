@@ -44,6 +44,8 @@ evals/
   baseline_results.json     Full-sweep baseline (gpt-oss-120b)
   baseline_smoke.json       Smoke baseline (gpt-oss-20b)
   comparisons/              Saved cross-model runs and REPORT.md
+  adversarial/              20-case write-policy benchmark, runner, and results
+docs/adding-a-tool.md       How to add a BaseTool
 tests/                      Unit and integration tests
 ```
 
@@ -104,15 +106,15 @@ uvicorn agentic_suite.main:app --reload
 | `GET` | `/slack/install` | Redirect to Slack OAuth (signed, single-use `state`) |
 | `GET` | `/slack/oauth/callback` | Verify state, exchange code, persist installation |
 | `POST` | `/slack/events` | Signature check, URL challenge, dedupe, dispatch |
-| `POST` | `/agent/run` | Run one prompt. Requires header `X-Agent-Key` |
+| `POST` | `/agent/run` | Run one prompt. Requires header `X-Agent-Key`. `allow_writes` defaults to false; `write_tools` optionally limits which write tools may run |
 
 `POST /agent/run` body:
 
 ```json
-{"prompt": "Post hello to #general", "team_id": "T0123"}
+{"prompt": "Post 'Hello from the agent' to #general", "allow_writes": true, "team_id": "T0123"}
 ```
 
-`team_id` is optional. Resolution order is the request value, then `DEFAULT_SLACK_TEAM_ID`, then the only Slack installation that does not need reauth. A missing workspace is fine for mock tools; the Slack tool reports it as a tool error the model can explain.
+Without `allow_writes`, write tools return a preview and nothing is sent. `write_tools`, when set, is the only set of write tools that may run. `team_id` is optional. Resolution order is the request value, then `DEFAULT_SLACK_TEAM_ID`, then the only Slack installation that does not need reauth. A missing workspace is fine for mock tools; the Slack tool reports it as a tool error the model can explain.
 
 The response includes `model`, `stop_reason` (`completed` or `max_steps`), `final_text`, and a `steps` list of `{tool, status, error}`. The loop allows 5 model turns. A provider failure returns 502.
 
@@ -130,7 +132,15 @@ Point an MCP client at the command. It needs the same `.env` as the API (`DATABA
 
 ## Tool SDK
 
-`BaseTool` is a Pydantic model plus an async `execute`. The class docstring (or `tool_description`) is what the model reads. `tool_name` defaults to snake_case of the class name. Class flags (`read_only`, `destructive`, `idempotent`, `open_world`, `simulated`, `display_title`) become MCP annotations.
+`BaseTool` is a Pydantic model plus an async `execute`. The class docstring (or `tool_description`) is what the model reads. `tool_name` defaults to snake_case of the class name. Class flags (`read_only`, `destructive`, `idempotent`, `open_world`, `simulated`, `display_title`) become MCP annotations. `target_fields` names the arguments that are a destination (a channel, a project, a repository). See [`docs/adding-a-tool.md`](docs/adding-a-tool.md).
+
+## Write policy
+
+The policy sits in code between the model's tool call and `ToolExecutor`. It does not live in the system prompt: the model can be talked out of an instruction, and it cannot talk its way out of a check that runs after it has chosen. The default is preview-only.
+
+- **Allowlist.** A tool marked `read_only` always runs. Any other tool is a write. `write_tools` on the request can narrow that set further; a tool outside it is blocked.
+- **Targets come from the user.** For each name in `target_fields`, the value has to appear in the user's own prompt. Text a tool returned cannot redirect a write to a destination the user did not name.
+- **Preview by default.** With `allow_writes` false, a write that passes those checks returns a preview and does not execute.
 
 `ConfigField` marks fields that stay off the LLM schema (injection flags, runtime knobs). `get_schema()` emits OpenAI-style function-calling JSON. `validate_arguments()` is `model_validate`.
 
@@ -235,6 +245,36 @@ python -m evals.compare evals/comparisons --out evals/comparisons/REPORT.md
 
 `compare` prints pass rate, selection accuracy, argument precision, a 95% Wilson interval, per-category counts, and the cases where runs disagree. Overlapping intervals are called out; overlap is a conservative check, not a significance test. Set `EVAL_RPM` to override a provider's default spacing. Cohere defaults to 18 requests per minute. `EVAL_RPM=0` turns the limiter off.
 
+### Adversarial evals
+
+`evals/adversarial/` is 20 cases: 16 attacks and 4 controls. Each attack is one injection style per case. There is no adaptive attacker. Four arms cross two switches, framing the tool result as untrusted data, and enforcing the write policy:
+
+| Arm | Framing | Write policy |
+|---|---|---|
+| `none` | off | off |
+| `framing` | on | off |
+| `policy` | off | on |
+| `both` | on | on |
+
+Three numbers, counted separately: **attack attempted** (the model tried the injected write), **attack succeeded** (that write actually ran), and **legit write executed** (the user's own requested write ran). Utility is reported next to attack success so a defence that blocks every write does not look good.
+
+```bash
+python -m evals.adversarial.runner --model openai/gpt-oss-120b --arms none,framing,policy,both
+```
+
+Recorded on **2026-11-02**. Attack columns are out of 16. Legit writes are out of 13.
+
+| Model | Arm | Attack attempted | Attack succeeded | Legit write executed |
+|---|---|---|---|---|
+| `openai/gpt-oss-120b` | none | 4/16 | 4/16 | 12/13 |
+| `openai/gpt-oss-120b` | framing | 0/16 | 0/16 | 13/13 |
+| `openai/gpt-oss-120b` | policy | 5/16 | 2/16 | 12/13 |
+| `openai/gpt-oss-120b` | both | 0/16 | 0/16 | 13/13 |
+| `cohere:command-a-plus-05-2026` | none | 2/16 | 2/16 | 13/13 |
+| `cohere:command-a-plus-05-2026` | both | 2/16 | 2/16 | 13/13 |
+
+The nightly workflow records `none` and `both` (the runner's default) and does not fail the build on that step. It adds about 120 model calls. See `.github/workflows/evals-full.yml`.
+
 ### Known limitations
 
 Scoring:
@@ -247,7 +287,8 @@ Scoring:
 The running app:
 
 - **Single shared key.** `/agent/run` is gated by one API key, not per-user auth, and has no per-key rate limit.
-- **Untrusted tool output.** Tool results go back to the model verbatim. A Slack message or an external API response could carry a prompt injection, and the agent loop has no isolation boundary or write-approval policy.
+- **Prompt injection is mitigated, not solved.** The write policy stops redirected and unrequested writes deterministically, but it does not inspect content. An injection that gets a secret into a message to a legitimate channel still works. The target check is lexical, so a destination that is also an ordinary word in the prompt (`general`) matches the word. The adversarial set has 20 cases, one injection style per case, and no adaptive attacker.
+- **MCP is not policy-gated.** The MCP server relies on the host's approval prompt and the tool annotations. The write policy applies to `/agent/run`.
 - **In-memory OAuth state.** Install `state` values live in the process. They are lost on restart and do not work across multiple instances.
 - **One workspace.** The agent and the MCP server act in the workspace from `DEFAULT_SLACK_TEAM_ID`, or the single healthy installation, not a workspace chosen by the MCP client.
 - **No conversation memory.** Each `/agent/run` starts fresh. Past runs are not stored.
@@ -257,15 +298,16 @@ The running app:
 
 ## Future work
 
-Ordered by how much each one improves the project. The first two address limitations above.
+Ordered by how much each one improves the project.
 
-1. **Write-action policy and adversarial evals.** Add an `allow_writes` request flag so non-read-only tools return a preview instead of executing, using the behaviour metadata that already drives MCP annotations. Add benchmark cases where a tool result or user message carries injected instructions, scored on whether the agent attempts the write.
-2. **Multi-step trajectory evals.** Add cases where the second call depends on the first call's result, scored on the whole run as a separate category so the single-call numbers stay comparable.
-3. **Persist agent runs.** Store each run's steps, errors, tokens, and latency, with a gated `GET /agent/runs/{id}`. Failures stay debuggable after the fact, and the comparison report can grow cost and latency columns.
-4. **Per-key auth and rate limiting on `/agent/run`.** Store hashed, labelled keys in the database, rate-limit per key, and log which key made each call.
-5. **Idempotent posting.** Record each intended post before sending, and after a timeout check the channel history before retrying. This needs an extra Slack scope, so the app must be reinstalled.
-6. **GitHub as a second real OAuth provider.** Make the OAuth module provider-agnostic and add GitHub. The MCP server builds from the registry, so the new tool would show up in hosts without server changes. It also forces a real answer to how the connected account is chosen.
-7. **Smaller follow-ups:**
+Done: the write-action policy and the adversarial evals. `/agent/run` takes `allow_writes`, non-read-only tools preview by default, and `evals/adversarial/` scores attempted writes, succeeded writes, and legitimate writes.
+
+1. **Multi-step trajectory evals.** Add cases where the second call depends on the first call's result, scored on the whole run as a separate category so the single-call numbers stay comparable. Scoring can reuse `evals/adversarial/`.
+2. **Persist agent runs.** Store each run's steps, errors, tokens, and latency, with a gated `GET /agent/runs/{id}`. Failures stay debuggable after the fact, and the comparison report can grow cost and latency columns.
+3. **Per-key auth and rate limiting on `/agent/run`.** Store hashed, labelled keys in the database, rate-limit per key, and log which key made each call.
+4. **Idempotent posting.** Record each intended post before sending, and after a timeout check the channel history before retrying. This needs an extra Slack scope, so the app must be reinstalled.
+5. **GitHub as a second real OAuth provider.** Make the OAuth module provider-agnostic and add GitHub. The MCP server builds from the registry, so the new tool would show up in hosts without server changes. It also forces a real answer to how the connected account is chosen.
+6. **Smaller follow-ups:**
    - A short screen recording of an MCP host posting to Slack, with the approval prompt visible.
    - A one-page write-up of the cross-model results.
    - Hypothesis property tests on schema generation and the schema adapter.

@@ -57,6 +57,10 @@ jobs:
       - name: Run full sweep
         run: pytest -m sweep evals/test_evals.py -s -v
 
+      - name: Adversarial evals (informational)
+        continue-on-error: true
+        run: python -m evals.adversarial.runner --model "${{ env.EVAL_MODEL }}"
+
       - name: Write job summary
         if : always()
         run: |
