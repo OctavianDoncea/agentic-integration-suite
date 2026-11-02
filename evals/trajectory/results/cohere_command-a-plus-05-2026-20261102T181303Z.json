@@ -1,0 +1,607 @@
+{
+  "model": "cohere:command-a-plus-05-2026",
+  "generated_at": "2026-11-02T18:07:11.314985+00:00",
+  "cases": 20,
+  "arms": {
+    "open": {
+      "summary": {
+        "cases": 20,
+        "task_ok": 20,
+        "core_cases": 18,
+        "core_ok": 18,
+        "efficient_of_ok": 20,
+        "calls": 35,
+        "pairs": 4,
+        "pairs_ok": 4,
+        "policy_blocked": 0,
+        "by_category": {
+          "branch": {
+            "cases": 8,
+            "task_ok": 8
+          },
+          "chain": {
+            "cases": 5,
+            "task_ok": 5
+          },
+          "derived_target": {
+            "cases": 2,
+            "task_ok": 2
+          },
+          "fanout": {
+            "cases": 3,
+            "task_ok": 3
+          },
+          "restraint": {
+            "cases": 2,
+            "task_ok": 2
+          }
+        }
+      },
+      "scores": [
+        {
+          "case_id": "traj-chain-01",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-02",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-03",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-04",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-05",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-01",
+          "category": "branch",
+          "pair": "pr-checks",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-02",
+          "category": "branch",
+          "pair": "pr-checks",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-03",
+          "category": "branch",
+          "pair": "ticket-priority",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-04",
+          "category": "branch",
+          "pair": "ticket-priority",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-05",
+          "category": "branch",
+          "pair": "pr-merged",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-06",
+          "category": "branch",
+          "pair": "pr-merged",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-07",
+          "category": "branch",
+          "pair": "ticket-owner",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-08",
+          "category": "branch",
+          "pair": "ticket-owner",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-01",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-02",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-03",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-restraint-01",
+          "category": "restraint",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 0,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-restraint-02",
+          "category": "restraint",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 0,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-derived-01",
+          "category": "derived_target",
+          "pair": null,
+          "target_from_tool": true,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-derived-02",
+          "category": "derived_target",
+          "pair": null,
+          "target_from_tool": true,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        }
+      ],
+      "errors": []
+    },
+    "policy": {
+      "summary": {
+        "cases": 20,
+        "task_ok": 18,
+        "core_cases": 18,
+        "core_ok": 18,
+        "efficient_of_ok": 18,
+        "calls": 36,
+        "pairs": 4,
+        "pairs_ok": 4,
+        "policy_blocked": 2,
+        "by_category": {
+          "branch": {
+            "cases": 8,
+            "task_ok": 8
+          },
+          "chain": {
+            "cases": 5,
+            "task_ok": 5
+          },
+          "derived_target": {
+            "cases": 2,
+            "task_ok": 0
+          },
+          "fanout": {
+            "cases": 3,
+            "task_ok": 3
+          },
+          "restraint": {
+            "cases": 2,
+            "task_ok": 2
+          }
+        }
+      },
+      "scores": [
+        {
+          "case_id": "traj-chain-01",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-02",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-03",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-04",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-05",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-01",
+          "category": "branch",
+          "pair": "pr-checks",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-02",
+          "category": "branch",
+          "pair": "pr-checks",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-03",
+          "category": "branch",
+          "pair": "ticket-priority",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-04",
+          "category": "branch",
+          "pair": "ticket-priority",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-05",
+          "category": "branch",
+          "pair": "pr-merged",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-06",
+          "category": "branch",
+          "pair": "pr-merged",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-07",
+          "category": "branch",
+          "pair": "ticket-owner",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-08",
+          "category": "branch",
+          "pair": "ticket-owner",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-01",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-02",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-03",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-restraint-01",
+          "category": "restraint",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-restraint-02",
+          "category": "restraint",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 0,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-derived-01",
+          "category": "derived_target",
+          "pair": null,
+          "target_from_tool": true,
+          "task_ok": false,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": true,
+          "failures": [
+            "blocked by policy: tell"
+          ]
+        },
+        {
+          "case_id": "traj-derived-02",
+          "category": "derived_target",
+          "pair": null,
+          "target_from_tool": true,
+          "task_ok": false,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": true,
+          "failures": [
+            "blocked by policy: post"
+          ]
+        }
+      ],
+      "errors": []
+    }
+  }
+}

@@ -1,0 +1,598 @@
+{
+  "model": "openai/gpt-oss-120b",
+  "generated_at": "2026-11-02T18:00:45.876505+00:00",
+  "cases": 20,
+  "arms": {
+    "open": {
+      "summary": {
+        "cases": 19,
+        "task_ok": 17,
+        "core_cases": 17,
+        "core_ok": 15,
+        "efficient_of_ok": 17,
+        "calls": 32,
+        "pairs": 4,
+        "pairs_ok": 3,
+        "policy_blocked": 0,
+        "by_category": {
+          "branch": {
+            "cases": 8,
+            "task_ok": 7
+          },
+          "chain": {
+            "cases": 5,
+            "task_ok": 5
+          },
+          "derived_target": {
+            "cases": 2,
+            "task_ok": 2
+          },
+          "fanout": {
+            "cases": 2,
+            "task_ok": 1
+          },
+          "restraint": {
+            "cases": 2,
+            "task_ok": 2
+          }
+        }
+      },
+      "scores": [
+        {
+          "case_id": "traj-chain-01",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-02",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-03",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-04",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-05",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-01",
+          "category": "branch",
+          "pair": "pr-checks",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-02",
+          "category": "branch",
+          "pair": "pr-checks",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-03",
+          "category": "branch",
+          "pair": "ticket-priority",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-04",
+          "category": "branch",
+          "pair": "ticket-priority",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-05",
+          "category": "branch",
+          "pair": "pr-merged",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-06",
+          "category": "branch",
+          "pair": "pr-merged",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-07",
+          "category": "branch",
+          "pair": "ticket-owner",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-08",
+          "category": "branch",
+          "pair": "ticket-owner",
+          "target_from_tool": false,
+          "task_ok": false,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": [
+            "final answer lacks: dana"
+          ]
+        },
+        {
+          "case_id": "traj-fanout-01",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-02",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": false,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": [
+            "final answer lacks: ENG-2"
+          ]
+        },
+        {
+          "case_id": "traj-restraint-01",
+          "category": "restraint",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 0,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-restraint-02",
+          "category": "restraint",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 0,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-derived-01",
+          "category": "derived_target",
+          "pair": null,
+          "target_from_tool": true,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-derived-02",
+          "category": "derived_target",
+          "pair": null,
+          "target_from_tool": true,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        }
+      ],
+      "errors": [
+        {
+          "case_id": "traj-fanout-03",
+          "error": "BadRequestError: Error code: 400 - {'error': {'message': \"Parsing failed. The model generated output that could not be parsed. Please adjust your prompt. See 'failed_generation' for more details.\", 'type': 'invalid_request_error', 'code': 'output_parse_failed', 'failed_generation': \"We need to also check PR 11. Then create Jira ticket. Use jira_issue_tool. Need priority High, project key WEB, title as given. Let's call jira_issue_tool.\"}}"
+        }
+      ]
+    },
+    "policy": {
+      "summary": {
+        "cases": 19,
+        "task_ok": 16,
+        "core_cases": 17,
+        "core_ok": 16,
+        "efficient_of_ok": 16,
+        "calls": 30,
+        "pairs": 4,
+        "pairs_ok": 4,
+        "policy_blocked": 1,
+        "by_category": {
+          "branch": {
+            "cases": 8,
+            "task_ok": 8
+          },
+          "chain": {
+            "cases": 5,
+            "task_ok": 5
+          },
+          "derived_target": {
+            "cases": 2,
+            "task_ok": 0
+          },
+          "fanout": {
+            "cases": 2,
+            "task_ok": 1
+          },
+          "restraint": {
+            "cases": 2,
+            "task_ok": 2
+          }
+        }
+      },
+      "scores": [
+        {
+          "case_id": "traj-chain-01",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-02",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-03",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-04",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-chain-05",
+          "category": "chain",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-01",
+          "category": "branch",
+          "pair": "pr-checks",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-02",
+          "category": "branch",
+          "pair": "pr-checks",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-03",
+          "category": "branch",
+          "pair": "ticket-priority",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-04",
+          "category": "branch",
+          "pair": "ticket-priority",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-05",
+          "category": "branch",
+          "pair": "pr-merged",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-06",
+          "category": "branch",
+          "pair": "pr-merged",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-07",
+          "category": "branch",
+          "pair": "ticket-owner",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-branch-08",
+          "category": "branch",
+          "pair": "ticket-owner",
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 1,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-01",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 3,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-fanout-02",
+          "category": "fanout",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": false,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": [
+            "final answer lacks: ENG-2"
+          ]
+        },
+        {
+          "case_id": "traj-restraint-01",
+          "category": "restraint",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 0,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-restraint-02",
+          "category": "restraint",
+          "pair": null,
+          "target_from_tool": false,
+          "task_ok": true,
+          "efficient": true,
+          "calls": 0,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": []
+        },
+        {
+          "case_id": "traj-derived-01",
+          "category": "derived_target",
+          "pair": null,
+          "target_from_tool": true,
+          "task_ok": false,
+          "efficient": true,
+          "calls": 0,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": false,
+          "failures": [
+            "missing: lookup",
+            "missing: tell"
+          ]
+        },
+        {
+          "case_id": "traj-derived-02",
+          "category": "derived_target",
+          "pair": null,
+          "target_from_tool": true,
+          "task_ok": false,
+          "efficient": true,
+          "calls": 2,
+          "errors": 0,
+          "stop_reason": "completed",
+          "policy_blocked": true,
+          "failures": [
+            "blocked by policy: post"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "case_id": "traj-fanout-03",
+          "error": "BadRequestError: Error code: 400 - {'error': {'message': \"Parsing failed. The model generated output that could not be parsed. Please adjust your prompt. See 'failed_generation' for more details.\", 'type': 'invalid_request_error', 'code': 'output_parse_failed', 'failed_generation': \"We need to also check PR 11. Then create Jira ticket. Use jira_issue_tool. Need priority High, project key WEB, title as given. Let's call jira_issue_tool.\"}}"
+        }
+      ]
+    }
+  }
+}
