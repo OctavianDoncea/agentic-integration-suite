@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     openai_compat_api_key: str | None = None
     openai_compat_adapt_schema: bool = False
 
+    agent_run_store_content: bool = True
+
     @field_validator("app_base_url")
     def _strip_trailing_slash(cls, value: str) -> str:
         return value.rstrip("/")

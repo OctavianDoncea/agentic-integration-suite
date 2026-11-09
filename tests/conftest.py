@@ -24,6 +24,7 @@ FAKE_ENV = {
     'OPENAI_COMPAT_BASE_URL': '',
     'OPENAI_COMPAT_API_KEY': '',
     'OPENAI_COMPAT_ADAPT_SCHEMA': 'false',
+    'AGENT_RUN_STORE_CONTENT': 'true'
 }
 
 @pytest.fixture(autouse=True)
@@ -39,6 +40,7 @@ def slack_engine():
     from agentic_suite.db import Base
     from agentic_suite.integrations.slack import models
     from agentic_suite.integrations.slack.crypto import get_fernet
+    from agentic_suite.agents import models as agent_models
 
     get_fernet.cache_clear()
     engine = create_engine('sqlite+pysqlite://', poolclass=StaticPool, connect_args={'check_same_thread': False})
