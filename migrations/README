@@ -1,1 +1,26 @@
-Generic single-database configuration.
+# Migrations
+
+Alembic revisions for the application database. Apply them with:
+
+```bash
+alembic upgrade head
+```
+
+`postgres://` and `postgresql://` URLs are rewritten to `postgresql+psycopg2://` before the engine is created.
+
+## Revisions
+
+| Revision | Table | What it stores |
+|---|---|---|
+| `e15156ef9971` | `slack_installations` | One row per Slack workspace: team id, encrypted bot token, and whether the install needs reauth |
+| `132826ed6a8b` | `agent_runs` | One row per `POST /agent/run`: status, model, steps, token counts, and latency |
+
+`agent_runs.id` is a 32-character hex id. `created_at` and `status` are indexed. The list endpoint pages on `created_at`.
+
+Prompt text, the answer, and tool-argument values are written only when `AGENT_RUN_STORE_CONTENT` is true (the default). With it false, the row still keeps the prompt hash, statuses, token counts, latency, and argument names.
+
+Recording a run is best-effort. If the insert fails, the request still returns its trace and `run_id` is null. Old rows are removed by hand:
+
+```bash
+python -m agentic_suite.agents.run_store prune --days 30
+```

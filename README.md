@@ -7,7 +7,7 @@ The package on disk is `src/`; imports use `agentic_suite` (see `pyproject.toml`
 ## What it does
 
 - **Tool SDK.** Subclass `BaseTool`, get a JSON Schema the model can call, validate arguments, and dispatch through `ToolRegistry`.
-- **Agent.** `POST /agent/run` runs a prompt through a chat model and the live tools until the model answers or hits a step limit. Model calls are retried; each tool call goes through a circuit breaker.
+- **Agent.** `POST /agent/run` runs a prompt through a chat model and the live tools until the model answers or hits a step limit. Model calls are retried; each tool call goes through a circuit breaker. Each run is stored in Postgres.
 - **MCP server.** The same live registry is exposed over stdio as `agentic-suite-mcp`, so another client can list and call the tools.
 - **Slack app.** OAuth install, Fernet-encrypted tokens in Postgres, HMAC request verification, event dispatch, and `event_id` deduplication. The live Slack tool posts with the stored bot token.
 - **Mock tools.** Offline Jira, GitHub, Slack, and calendar tools, with injectable failures so retry and circuit-breaker tests do not need live APIs.
@@ -22,16 +22,18 @@ src/
   config.py                 Pydantic settings from env / .env
   db.py                     SQLAlchemy engine, sessions, URL normalizer
   logging_config.py         App vs telemetry log formatters
-  main.py                   FastAPI: health, Slack OAuth, events, /agent/run
+  main.py                   FastAPI: health, Slack OAuth, events, agent runs
   mcp_server.py             stdio MCP server over the live registry
-  agents/                   loop, executor, live registry, system prompt
+  agents/                   loop, executor, policy, live registry, system prompt
+  agents/models.py          AgentRun row
+  agents/run_store.py       persist, list, stats, prune
   sdk/base.py               BaseTool ABC + schema generation
   sdk/registry.py           Register / list schemas / execute + telemetry
   tools/mock/               Jira, GitHub, Slack, calendar (offline)
   integrations/slack/       OAuth, crypto, models, signature, events, live post tool
   middleware/               retry, circuit_breaker, telemetry
   clients/                  ChatClient, Groq, Cohere, OpenAI-compatible, schema adapter
-migrations/                 Alembic (slack_installations table)
+migrations/                 Alembic: slack_installations, agent_runs
 evals/
   schema.py                 BenchmarkCase / ExpectedOutcome loader
   scoring.py                score_case + RunSummary metrics
@@ -44,7 +46,8 @@ evals/
   baseline_results.json     Full-sweep baseline (gpt-oss-120b)
   baseline_smoke.json       Smoke baseline (gpt-oss-20b)
   comparisons/              Saved cross-model runs and REPORT.md
-  adversarial/              20-case write-policy benchmark, runner, and results
+  adversarial/              20-case write-policy benchmark; report includes tokens and latency
+  trajectory/               Multi-step cases; report includes tokens and latency
 docs/adding-a-tool.md       How to add a BaseTool
 tests/                      Unit and integration tests
 ```
@@ -70,7 +73,8 @@ Copy `.env.example` to `.env` (`Copy-Item .env.example .env` on PowerShell, `cp 
 | `SLACK_SIGNING_SECRET` | yes | Incoming request HMAC |
 | `SLACK_TOKEN_ENCRYPTION_KEY` | yes | Fernet key for tokens at rest |
 | `DATABASE_URL` | yes | Postgres (tests can use SQLite) |
-| `AGENT_API_KEY` | for `/agent/run` | Shared secret checked as `X-Agent-Key`. Unset disables the endpoint (503) |
+| `AGENT_API_KEY` | for `/agent/run` and the run reads | Shared secret checked as `X-Agent-Key`. Unset disables those endpoints (503) |
+| `AGENT_RUN_STORE_CONTENT` | no | `true` (default) stores prompts, tool arguments, and answers on the run row. `false` keeps the shape (tools, statuses, tokens, latency, argument names, a prompt hash) and drops the content |
 | `AGENT_MODEL` | no | `provider:model` or a bare model id. Falls back to `GROQ_MODEL_FULL` |
 | `DEFAULT_SLACK_TEAM_ID` | no | Workspace used when a request does not name one |
 | `COHERE_API_KEY` | for Cohere | Cohere chat |
@@ -106,7 +110,10 @@ uvicorn agentic_suite.main:app --reload
 | `GET` | `/slack/install` | Redirect to Slack OAuth (signed, single-use `state`) |
 | `GET` | `/slack/oauth/callback` | Verify state, exchange code, persist installation |
 | `POST` | `/slack/events` | Signature check, URL challenge, dedupe, dispatch |
-| `POST` | `/agent/run` | Run one prompt. Requires header `X-Agent-Key`. `allow_writes` defaults to false; `write_tools` optionally limits which write tools may run |
+| `POST` | `/agent/run` | Run one prompt. Requires `X-Agent-Key`. `allow_writes` defaults to false; `write_tools` optionally limits which write tools may run. The response includes `usage` and a `run_id` (`null` if the row could not be stored) |
+| `GET` | `/agent/runs/{id}` | One recorded run: request, steps, outcome, tokens, latency. Requires `X-Agent-Key` |
+| `GET` | `/agent/runs` | Recent runs, newest first. Filter with `status` (`completed`, `max_steps`, `failed`). Page with `before`. Requires `X-Agent-Key` |
+| `GET` | `/agent/stats` | Run counts, tokens, and p50/p95 latency over the last N hours (`hours`, default 24). Requires `X-Agent-Key` |
 
 `POST /agent/run` body:
 
@@ -116,7 +123,21 @@ uvicorn agentic_suite.main:app --reload
 
 Without `allow_writes`, write tools return a preview and nothing is sent. `write_tools`, when set, is the only set of write tools that may run. `team_id` is optional. Resolution order is the request value, then `DEFAULT_SLACK_TEAM_ID`, then the only Slack installation that does not need reauth. A missing workspace is fine for mock tools; the Slack tool reports it as a tool error the model can explain.
 
-The response includes `model`, `stop_reason` (`completed` or `max_steps`), `final_text`, and a `steps` list of `{tool, status, error}`. The loop allows 5 model turns. A provider failure returns 502.
+The response includes `model`, `stop_reason` (`completed` or `max_steps`), `final_text`, `usage` (model calls, prompt and completion tokens, model time, and whole-run duration), `run_id`, and a `steps` list. The loop allows 5 model turns. A provider failure is still recorded, with `status` `failed`, and the request returns 502.
+
+## Run records
+
+Every `/agent/run` tries to insert one `agent_runs` row: steps, outcome, tokens, and latency. Recording is best-effort. A failed insert is logged, `run_id` is `null`, and the request still returns the trace the caller already has, including a run that failed midway.
+
+- **The caller owns the trace.** The HTTP response is the trace. The database copy is for later.
+- **Content is a setting.** `AGENT_RUN_STORE_CONTENT=false` leaves prompt text, the answer, and argument values out of the row. The hash, statuses, tokens, latency, and argument names stay.
+- **Latency is split.** `duration_ms` is the whole run, `model_ms` is time inside model calls, and each step has its own `latency_ms`, so a slow run can be attributed. Token totals count the response that was used. A failed attempt that was retried is not added to the token counts. Its time is included in `model_ms`.
+
+List results are newest first. Pass the returned `next_before` as `before` to get the next page. Delete old rows by hand:
+
+```bash
+python -m agentic_suite.agents.run_store prune --days 30
+```
 
 Logging is configured at import time. Telemetry lines are raw JSON; everything else is timestamped.
 
@@ -275,6 +296,8 @@ Recorded on **2026-11-02**. Attack columns are out of 16. Legit writes are out o
 
 The nightly workflow records `none` and `both` (the runner's default) and does not fail the build on that step. It adds about 120 model calls. See `.github/workflows/evals-full.yml`.
 
+The adversarial report and the trajectory report (`python -m evals.trajectory.runner`) both include mean tokens per case and mean latency per case.
+
 ### Known limitations
 
 Scoring:
@@ -291,7 +314,10 @@ The running app:
 - **MCP is not policy-gated.** The MCP server relies on the host's approval prompt and the tool annotations. The write policy applies to `/agent/run`.
 - **In-memory OAuth state.** Install `state` values live in the process. They are lost on restart and do not work across multiple instances.
 - **One workspace.** The agent and the MCP server act in the workspace from `DEFAULT_SLACK_TEAM_ID`, or the single healthy installation, not a workspace chosen by the MCP client.
-- **No conversation memory.** Each `/agent/run` starts fresh. Past runs are not stored.
+- **No conversation memory.** Each `/agent/run` starts a new conversation. Past runs are stored, but they are not sent back to the model.
+- **Run records hold user content by default.** Prompts, tool arguments, and answers are stored unless `AGENT_RUN_STORE_CONTENT=false`. Anyone with the agent key can read them. Pruning is manual.
+- **Tokens count only the response that was used.** Failed and retried model attempts are not included in token totals, though their time is included in `model_ms`.
+- **Keyset paging on timestamps.** Two runs created in the same instant can straddle a page boundary, because `before` compares `created_at` only.
 - **Ambiguous post outcomes.** A Slack post that times out may or may not have landed. The tool does not retry it, which avoids duplicates and can leave the outcome unknown.
 - **stdio-only MCP.** There is no remote MCP endpoint. Serving the Slack tool over HTTP would need MCP authorization so only approved clients can post as the bot.
 - **Mocked integrations.** Jira, GitHub, and Calendar do not touch real services.
@@ -300,14 +326,16 @@ The running app:
 
 Ordered by how much each one improves the project.
 
-Done: the write-action policy and the adversarial evals. `/agent/run` takes `allow_writes`, non-read-only tools preview by default, and `evals/adversarial/` scores attempted writes, succeeded writes, and legitimate writes.
+Done:
 
-1. **Multi-step trajectory evals.** Add cases where the second call depends on the first call's result, scored on the whole run as a separate category so the single-call numbers stay comparable. Scoring can reuse `evals/adversarial/`.
-2. **Persist agent runs.** Store each run's steps, errors, tokens, and latency, with a gated `GET /agent/runs/{id}`. Failures stay debuggable after the fact, and the comparison report can grow cost and latency columns.
-3. **Per-key auth and rate limiting on `/agent/run`.** Store hashed, labelled keys in the database, rate-limit per key, and log which key made each call.
-4. **Idempotent posting.** Record each intended post before sending, and after a timeout check the channel history before retrying. This needs an extra Slack scope, so the app must be reinstalled.
-5. **GitHub as a second real OAuth provider.** Make the OAuth module provider-agnostic and add GitHub. The MCP server builds from the registry, so the new tool would show up in hosts without server changes. It also forces a real answer to how the connected account is chosen.
-6. **Smaller follow-ups:**
+- **Write-action policy and adversarial evals.** `/agent/run` takes `allow_writes`, non-read-only tools preview by default, and `evals/adversarial/` scores attempted writes, succeeded writes, and legitimate writes.
+- **Multi-step trajectory evals.** `evals/trajectory/` scores a whole run, including cases where a later call depends on an earlier result.
+- **Persisted agent runs.** One `agent_runs` row per `/agent/run`, with `GET /agent/runs/{id}`, a list, and `GET /agent/stats`.
+
+1. **Per-key auth and rate limiting on `/agent/run`.** Store hashed, labelled keys in the database, rate-limit per key, and log which key made each call. The key id can be one more column on `agent_runs`.
+2. **Idempotent posting.** Record each intended post before sending, and after a timeout check the channel history before retrying. This needs an extra Slack scope, so the app must be reinstalled.
+3. **GitHub as a second real OAuth provider.** Make the OAuth module provider-agnostic and add GitHub. The MCP server builds from the registry, so the new tool would show up in hosts without server changes. It also forces a real answer to how the connected account is chosen.
+4. **Smaller follow-ups:**
    - A short screen recording of an MCP host posting to Slack, with the approval prompt visible.
    - A one-page write-up of the cross-model results.
    - Hypothesis property tests on schema generation and the schema adapter.
