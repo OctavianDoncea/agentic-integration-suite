@@ -176,7 +176,7 @@ def test_run_endpoints_need_the_agent_key(agent_key, wire):
 def test_an_unknown_run_is_a_404_and_a_malformed_id_is_rejected(agent_key, wire):
     wire['client'] = FakeChatClient([])
 
-    assert get(f'/agent/runs/{'0' * 32}').status_code == 404
+    assert get(f'/agent/runs/{"0" * 32}').status_code == 404
     assert get('/agent/runs/not-a-run-id').status_code == 422
 
 def test_runs_list_newest_first(agent_key, wire):
@@ -196,7 +196,7 @@ def test_a_failed_run_is_recorded_before_the_502(agent_key, wire):
     failed = get('/agent/runs?status=failed').json()['runs']
 
     assert len(failed) == 1
-    run = get(f'/agent/runs/{failed[0]['id']}').json()
+    run = get(f"/agent/runs/{failed[0]['id']}").json()
     assert run['status'] == 'failed'
     assert run['error_type'] == 'RuntimeError'
 
