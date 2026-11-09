@@ -3,10 +3,11 @@ from __future__ import annotations
 import hmac
 import logging
 import json
-from fastapi import Depends, FastAPI, Query, Request, Header, HTTPException
+from fastapi import Depends, FastAPI, Query, Request, Header, HTTPException, Path
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, PlainTextResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
+from datetime import datetime
 from agentic_suite.config import get_settings
 from agentic_suite.db import get_session
 from agentic_suite.integrations.slack.oauth import InvalidOAuthStateError, TokenExchangeError, build_authorize_url, exchange_code_for_token, generate_state, persist_installation, verify_state
@@ -18,6 +19,8 @@ from agentic_suite.agents.executor import ToolExecutor
 from agentic_suite.agents.loop import run_agent
 from agentic_suite.agents.registry import build_live_registry
 from agentic_suite.agents.policy import WritePolicy
+from agentic_suite.agents import run_store
+from agentic_suite.agents.loop import RunTrace
 from agentic_suite.clients.base import ChatClient
 from agentic_suite.clients.groq_client import GroqClient
 from agentic_suite.clients.factory import make_chat_client
@@ -138,15 +141,53 @@ class AgentRunRequest(BaseModel):
 
 @app.post('/agent/run', tags=['agent'], dependencies=[Depends(require_agent_key)])
 async def agent_run(body: AgentRunRequest, session: Session = Depends(get_session), client: ChatClient = Depends(get_chat_client), executor: ToolExecutor = Depends(get_executor)):
-    """Run one request through the model and the live tools."""
+    """Run one request through the model and the live tools, and record the run."""
 
-    runtime_context = {'session': session, 'team_id': resolve_team_id(session, body.team_id)}
+    team_id = resolve_team_id(session, body.team_id)
+    runtime_context = {'session': session, 'team_id': team_id}
     policy = WritePolicy(allow_writes=body.allow_writes, allowed_tools=frozenset(body.write_tools) if body.write_tools is not None else None)
+    trace = RunTrace()
+    result = None
+    status, final_text, error_type = 'failed', None, None
 
     try:
-        result = await run_agent(body.prompt, client=client, executor=executor, runtime_context=runtime_context, policy=policy)
-    except Exception:
+        result = await run_agent(body.prompt, client=client, executor=executor, runtime_context=runtime_context, policy=policy, trace=trace)
+        status, final_text = result.stop_reason, result.final_text
+    except Exception as exc:
+        error_type = type(exc).__name__
         logger.exception('Agent run failed')
+
+    run_id = run_store.persist_run(
+        session, run_id=run_store.new_run_id(), prompt=body.prompt, trace=trace, status=status, model=client.model, provider=getattr(client, 'provider', None),
+        final_text=final_text, error_type=error_type, team_id=team_id, allow_writes=body.allow_writes, write_tools=body.write_tools, 
+        store_content=get_settings().agent_run_store_content
+    )
+
+    if result is None:
         raise HTTPException(status_code=502, detail='The model provider failed. Try again shortly.')
 
-    return result.to_dict()
+    return {**result.to_dict(), 'run_id': run_id}
+
+RUN_ID_PATTERN = r'^[0-9a-f]{32}$'
+
+@app.get('/agent/runs/{run_id}', tags=['agent'], dependencies=[Depends(require_agent_key)])
+async def get_agent_run(run_id: str = Path(pattern=RUN_ID_PATTERN), session: Session = Depends(get_session)):
+    run = run_store.get_run(session, run_id)
+
+    if run is None:
+        raise HTTPException(status_code=404, detail='No such run.')
+
+    return run_store.run_to_dict(run)
+
+@app.get('/agent/runs', tags=['agent'], dependencies=[Depends(require_agent_key)])
+async def list_agent_runs(limit: int = Query(default=20, ge=1, le=100), status: str | None = Query(default=None, pattern='^(completed|max_steps|failed)$'),
+    before: datetime | None = Query(default=None, description='Only runs created before this time.'), session: Session = Depends(get_session)
+):
+    runs = run_store.list_runs(session, limit=limit, status=status, before=before)
+    next_before = run_store._iso(runs[-1].created_at) if len(runs) == limit else None
+
+    return {'runs': [run_store.run_summary(run) for run in runs], 'next_before': next_before}
+
+@app.get('/agent/stats', tags=['agent'], dependencies=[Depends(require_agent_key)])
+async def agent_stats(hours: int = Query(default=24, ge=1, le=720), session: Session = Depends(get_session)):
+    return run_store.stats(session, hours=hours)
