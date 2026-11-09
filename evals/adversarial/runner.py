@@ -52,7 +52,7 @@ async def run_arm(cases: list[AdversarialCase], arm: Arm, client: ChatClient, *,
             errors.append({'case_id': case.id, 'error': f'{type(exc).__name__}: {exc}'})
             continue
 
-        scores.append(score_case(case, result.steps))
+        scores.append(score_case(case, result.steps, result.usage))
 
     return scores, errors
 
@@ -67,22 +67,34 @@ def _interval(n: int, d: int) -> str:
     low, high = wilson_interval(n, d)
     return f'{low:.0%}-{high:.0%}'
 
+def _mean_tokens(summary: dict[str, Any]) -> str:
+    scored = summary['scored']
+
+    if not scored:
+        return 'n/a'
+
+    return f"{(summary['prompt_tokens'] + summary['completion_tokens']) / scored:,.0f}"
+
+def _mean_seconds(summary: dict[str, Any]) -> str:
+    scored = summary['scored']
+    return 'n/a' if not scored else f"{summary['duration_ms'] / scored / 1000:.1f}s"
+
 def render_report(payload: dict[str, Any]) -> str:
     arms: dict[str, Any] = payload['arms']
     lines = [
         f"# Adversarial eval: `{payload['model']}`",
         '',
-        '| Arm | Attack attempted | Attack succeeded | 95% CI | Legit write executed | 95% CI | API errors |',
-        '|---|---|---|---|---|---|---|'
+        '| Arm | Attack attempted | Attack succeeded | 95% CI | Legit write executed | 95% CI '
+        '| Mean tokens/case | Mean latency/case | API errors |',
+        '|---|---|---|---|---|---|---|---|---|'
     ]
-
     for name, data in arms.items():
         s = data['summary']
         lines.append(
             f"| {name} | {_frac(s['attempted'], s['attack_cases'])} "
             f"| {_frac(s['succeeded'], s['attack_cases'])} | {_interval(s['succeeded'], s['attack_cases'])} "
             f"| {_frac(s['utility_ok'], s['utility_cases'])} | {_interval(s['utility_ok'], s['utility_cases'])} "
-            f"| {len(data['errors'])} |"
+            f"| {_mean_tokens(s)} | {_mean_seconds(s)} | {len(data['errors'])} |"
         )
 
     categories = sorted({c for data in arms.values() for c in data['summary']['by_category']})

@@ -2,7 +2,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
-from agentic_suite.agents.loop import AgentResult, AgentStep
+from agentic_suite.agents.loop import AgentResult, AgentStep, Usage
 from evals.adversarial.scoring import call_matches
 from evals.trajectory.schema import TrajectoryCase
 
@@ -19,9 +19,13 @@ class TrajectoryScore:
     stop_reason: str
     policy_blocked: bool
     failures: tuple[str, ...]
+    model_calls: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    duration_ms: float = 0.0
 
 
-def score_case(case: TrajectoryCase, steps: Sequence[AgentStep], final_text: str | None, stop_reason: str) -> TrajectoryScore:
+def score_case(case: TrajectoryCase, steps: Sequence[AgentStep], final_text: str | None, stop_reason: str, usage: Usage | None = None) -> TrajectoryScore:
     failures: list[str] = []
     policy_blocked = False
     matched: dict[str, int] = {}
@@ -74,11 +78,15 @@ def score_case(case: TrajectoryCase, steps: Sequence[AgentStep], final_text: str
         errors = sum(1 for step in steps if step.status == 'error'),
         stop_reason = stop_reason,
         policy_blocked = policy_blocked,
-        failures = tuple(failures)
+        failures = tuple(failures),
+        model_calls = usage.model_calls if usage else 0,
+        prompt_tokens = usage.prompt_tokens if usage else 0,
+        completion_tokens = usage.completion_tokens if usage else 0,
+        duration_ms = usage.duration_ms if usage else 0.0
     )
 
 def score_result(case: TrajectoryCase, result: AgentResult) -> TrajectoryScore:
-    return score_case(case, result.steps, result.final_text, result.stop_reason)
+    return score_case(case, result.steps, result.final_text, result.stop_reason, result.usage)
 
 def summarize(scores: Sequence[TrajectoryScore]) -> dict[str, Any]:
     by_category: dict[str, dict[str, int]] = {}
@@ -107,5 +115,8 @@ def summarize(scores: Sequence[TrajectoryScore]) -> dict[str, Any]:
         'pairs': len(complete),
         'pairs_ok': sum(all(s.task_ok for s in rows) for rows in complete),
         'policy_blocked': sum(s.policy_blocked for s in scores),
-        'by_category': by_category
+        'by_category': by_category,
+        'prompt_tokens': sum(s.prompt_tokens for s in scores),
+        'completion_tokens': sum(s.completion_tokens for s in scores),
+        'duration_ms': sum(s.duration_ms for s in scores)
     }

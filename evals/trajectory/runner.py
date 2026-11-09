@@ -66,23 +66,35 @@ def _interval(n: int, d: int) -> str:
     low, high = wilson_interval(n, d)
     return f'{low:.0%}-{high:.0%}'
 
+def _mean_tokens(summary: dict[str, Any]) -> str:
+    cases = summary['cases']
+
+    if not cases:
+        return 'n/a'
+
+    return f"{(summary['prompt_tokens'] + summary['completion_tokens']) / cases:,.0f}"
+
+def _mean_seconds(summary: dict[str, Any]) -> str:
+    cases = summary['cases']
+    return 'n/a' if not cases else f"{summary['duration_ms'] / cases / 1000:.1f}s"
+
 def render_report(payload: dict[str, Any]) -> str:
     arms: dict[str, Any] = payload['arms']
     lines = [
         f"# Trajectory eval: `{payload['model']}`",
-        '',
+        "",
         '| Arm | Task success | 95% CI | Excl. derived-target | Branch pairs both right '
-        '| Efficient (of successes) | Mean calls | API errors |',
-        '|---|---|---|---|---|---|---|---|'
+        '| Efficient (of successes) | Mean calls | Mean tokens/case | Mean latency/case | API errors |',
+        '|---|---|---|---|---|---|---|---|---|---|',
     ]
-
     for name, data in arms.items():
         s = data['summary']
         mean_calls = f"{s['calls'] / s['cases']:.1f}" if s['cases'] else 'n/a'
         lines.append(
             f"| {name} | {_frac(s['task_ok'], s['cases'])} | {_interval(s['task_ok'], s['cases'])} "
             f"| {_frac(s['core_ok'], s['core_cases'])} | {_frac(s['pairs_ok'], s['pairs'])} "
-            f"| {_frac(s['efficient_of_ok'], s['task_ok'])} | {mean_calls} | {len(data['errors'])} |"
+            f"| {_frac(s['efficient_of_ok'], s['task_ok'])} | {mean_calls} "
+            f"| {_mean_tokens(s)} | {_mean_seconds(s)} | {len(data['errors'])} |"
         )
         
     categories = sorted({c for data in arms.values() for c in data['summary']['by_category']})
