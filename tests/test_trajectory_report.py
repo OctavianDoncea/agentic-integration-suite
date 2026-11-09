@@ -49,3 +49,8 @@ def test_the_report_survives_an_empty_arm():
         'arms': {'open': {'summary': summarize([]), 'scores': [], 'errors': [{'case_id': 'a', 'error': 'x'}]}},
     }
     assert 'n/a' in render_report(payload)
+
+def test_the_report_has_cost_and_latency_columns():
+    report = render_report(make_payload())
+    assert 'Mean tokens/case' in report
+    assert 'Mean latency/case' in report

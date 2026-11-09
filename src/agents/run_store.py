@@ -42,7 +42,7 @@ def step_record(step: AgentStep, store_content: bool) -> dict[str, Any]:
     if store_content:
         record['arguments'] = step.arguments
     else:
-        record['arguments'] = sorted(step.arguments or [])
+        record['argument_keys'] = sorted(step.arguments or [])
 
     return record
 
